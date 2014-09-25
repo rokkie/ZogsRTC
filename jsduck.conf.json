@@ -1,0 +1,9 @@
+{
+    "--builtin-classes": true,
+    "--seo"            : true,
+    "--title"          : "Zogs' WebRTC API docs",
+    "--output"         : "./docs/api",
+    "--"               : [
+        "./src"
+    ]
+}
