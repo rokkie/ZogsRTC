@@ -15,6 +15,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function (module) {
+(function (config) {
+    // require dependencies
+    require('./src/polyfills');
+    var express = require('express'),
+        app     = express(),
+        router  = express.Router(),
+        http    = require('http').Server(app),
+        io      = require('socket.io')(http),
+        zogsrtc = require('./src/ZogsRTC.js'),
 
-}(module));
+        // ..
+        mngr        = new zogsrtc.Model.Manager(),
+        channelCtrl = new zogsrtc.Ctrl.ChannelController(io, mngr);
+
+
+    // TODO: move to somewhere..
+    router.param('channelName', function (req, res, next, channelName) {
+        if (channelName.match(/[^a-z0-9\-\_]+/i)) {
+            return;
+        }
+
+        req.channelName = channelName;
+        next();
+    });
+
+    router.get('/', channelCtrl.listChannels.bind(channelCtrl));
+    router.get('/:channelName', channelCtrl.readChannel.bind(channelCtrl));
+
+    app.use('/', router);
+
+    // ...
+    http.listen(config.port, function () {
+        console.log('listening on *:', config.port);
+    });
+
+}({
+    port: 3000
+}));
