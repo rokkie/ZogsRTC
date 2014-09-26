@@ -101,7 +101,7 @@
             }
 
             this.rooms.push(room);
-            this.emitter.emit('roomadd', room);
+            this.emit('roomadd', room);
             return room;
         },
 

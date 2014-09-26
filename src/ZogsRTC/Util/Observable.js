@@ -42,12 +42,27 @@
     // assign the prototype and constructor
     Observable.prototype = Util.copy({
         /**
-         * @param  {String}   event    Event name
-         * @param  {Function} listener Callback
-         * @return {EventEmitter}      The event emitter
+         * Adds a listener to the end of the listeners array for the specified event
+         *
+         * @chainable
+         * @param  {String}     event    Event name
+         * @param  {Function}   listener Callback
+         * @return {Observable} Provides fluent interface
          */
         on: function (event, listener) {
             this.emitter.on(event, listener);
+            return this;
+        },
+
+        /**
+         * Execute each of the listeners in order with the supplied arguments
+         *
+         * @param  {String}    event The event to emit
+         * @param  {Object...} args
+         * @return {Boolean}   TRUE is the event had listeners, FALSE otherwise
+         */
+        emit: function (event) {
+            return this.emitter.emit.apply(this.emitter, arguments);
         }
     }, Object.create(Object.prototype));
     Observable.prototype.constructor = Observable;
