@@ -21,13 +21,20 @@ module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
+        env: {
+            coverage: {
+                INSTRUMENT_DIR: './test/instrument/'
+            }
+        },
+
         jshint: {
             all: [
                 './Gruntfile.js',
-                './karma.conf.js',
                 './index.js',
                 './src/ZogsRTC/**/*.js',
-                './src/ZogsRTC.js'
+                './src/ZogsRTC.js',
+                './test/ZogsRTC/**/*.js',
+                './test/ZogsRTC.js'
             ]
         },
 
@@ -45,20 +52,6 @@ module.exports = function(grunt) {
             }
         },
 
-        develop: {
-            server: {
-                file: './index.js'
-            }
-        },
-
-        karma: {
-            unit: {
-                configFile: './karma.conf.js',
-                reporters : ['coverage', 'dots'],
-                singleRun : true
-            }
-        },
-
         jsduck: {
             main: {
                 src    : ['./src'],
@@ -69,17 +62,56 @@ module.exports = function(grunt) {
                     'title'          : "Zogs' WebRTC API docs"
                 }
             }
+        },
+
+        develop: {
+            server: {
+                file: './index.js'
+            }
+        },
+
+        instrument: {
+            files  : './src/**/*.js',
+            options: {
+                lazy    : true,
+                basePath: './test/instrument/'
+            }
+        },
+
+        nodeunit: {
+            all    : ['./test/**/*.test.js'],
+            options: {
+                reporter: 'default'
+            }
+        },
+
+        storeCoverage: {
+            options: {
+                dir: './test/coverage/'
+            }
+        },
+
+        makeReport: {
+            src    : './test/coverage/**/*.json',
+            options: {
+                type : 'lcov',
+                dir  : './test/coverage/',
+                print: 'detail'
+            }
         }
     });
 
     // Load plugins
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-nodeunit');
     grunt.loadNpmTasks('grunt-develop');
-    grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-env');
+    grunt.loadNpmTasks('grunt-istanbul');
     grunt.loadNpmTasks('grunt-jsduck');
 
     // Default task(s).
     grunt.registerTask('default', ['develop']);
+    grunt.registerTask('coverage', ['env:coverage', 'instrument', 'nodeunit', 'storeCoverage', 'makeReport']);
 
 };
