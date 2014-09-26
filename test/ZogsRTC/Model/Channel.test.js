@@ -76,7 +76,7 @@ require('../../../src/polyfills');
     };
 
     var shouldNotReturnPrivateRoom = function (t) {
-        var publicRoom  = new Room({ name: 'foo' });
+        var publicRoom  = new Room({ name: 'foo', isPublic: true });
         var privateRoom = new Room({ name: 'bar', isPublic: false });
         var channel     = new Channel({ name: 'baz' });
 
