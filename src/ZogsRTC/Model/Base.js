@@ -36,7 +36,7 @@
      */
     function Base (config) {
         // properties
-        var name = undefined;
+        var name;
 
         // call parent constructor
         Observable.apply(this, [config]);
@@ -69,7 +69,7 @@
         // check argument
         if (!(config instanceof Object)) {
             throw new TypeError('Config should be object literal');
-        };
+        }
 
         // set values in config object, triggering setters
         for (var key in config) {

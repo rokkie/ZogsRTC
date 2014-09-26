@@ -26,7 +26,7 @@ require('../../../src/polyfills');
     var shouldAddRoom = function (t) {
         var name1   = 'foo';
         var name2   = 'bar';
-        var channel = new Channel({ name: 'baz' })
+        var channel = new Channel({ name: 'baz' });
 
         channel.addRoom(name1);                     // using name
         channel.addRoom(new Room({ name: name2 })); // using instance
@@ -54,7 +54,7 @@ require('../../../src/polyfills');
     var shouldNotAddSameRoomTwice = function (t) {
         var name1   = 'foo';
         var name2   = 'foo';
-        var channel = new Channel({ name: 'bar' })
+        var channel = new Channel({ name: 'bar' });
 
         t.throws(function () {
             channel.addRoom(name1);
@@ -66,7 +66,7 @@ require('../../../src/polyfills');
     var shouldEmitEventOnAddRoom = function (t) {
         var event   = 'roomadd';
         var name    = 'foo';
-        var channel = new Channel({ name: 'bar' })
+        var channel = new Channel({ name: 'bar' });
 
         channel.on(event, function (room) {
             t.equal(name, room.name);

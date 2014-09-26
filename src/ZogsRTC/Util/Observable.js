@@ -37,7 +37,7 @@
          * @property {EventEmitter} emitter Event emitter
          */
         this.emitter = new events.EventEmitter();
-    };
+    }
 
     // assign the prototype and constructor
     Observable.prototype = Util.copy({
