@@ -23,9 +23,9 @@
  */
 (function (module) {
     // require dependencies
-    var events  = require('events').EventEmitter,
-        Base    = require('./Base.js'),
-        Room    = require('./Room.js');
+    var Util = require('../Util/Util.js'),
+        Base = require('./Base.js'),
+        Room = require('./Room.js');
 
     /**
      * Fires when a room is added
@@ -36,12 +36,13 @@
 
     /**
      * @constructor
-     * @param   {String} name   Channel name
+     * @param   {Object} config Key/Values to set
      * @returns {Channel}
      */
-    function Channel (name) {
+    function Channel (config) {
         // call parent constructor
-        Base.apply(this, [name]);
+        Base.apply(this, [config]);
+
         /**
          * @readonly
          * @property {String} name Channel name
@@ -55,8 +56,7 @@
     }
 
     // assign the prototype and constructor
-    Channel.prototype.constructor = Channel;
-    Channel.prototype             = Object.assign({
+    Channel.prototype = Util.copy({
         /**
          * Get information about this room
          *
@@ -65,7 +65,11 @@
         getInfo: function () {
             return {
                 name : this.name,
-                rooms: this.getRooms()
+                rooms: this.getRooms().map(function (room) {
+                    return {
+                        name: room.name
+                    };
+                })
             };
         },
 
@@ -81,22 +85,23 @@
         },
 
         /**
-         * Add a new room if it does not already exist
+         * Add a new room to the channel if it does not already exist
          *
          * @param   {Room} r Room or name
+         * @throws  {Error}  When tying to add a room with an existing name
          * @returns {Room}
          */
-        addRoom: function (r) {
-            var roomName = (r instanceof Room) ? r.name : r,
-                room     = this.hasRoom(roomName);
-
-            if (!room) {
-                room = new Room(roomName);
-                this.rooms.push(room);
-
-                events.emit('roomadd', room);
+        addRoom: function (room) {
+            if (this.hasRoom(room)) {
+                throw new Error('A room with the same name already exists');
             }
 
+            if (!(room instanceof Room)) {
+                room = new Room({ name: room });
+            }
+
+            this.rooms.push(room);
+            this.emitter.emit('roomadd', room);
             return room;
         },
 
@@ -107,15 +112,14 @@
          * @returns {Room}
          */
         hasRoom: function (room) {
-            var rooms    = this.rooms,
-                roomName = (room instanceof Room) ? room.name : room;
+            var roomName = (room instanceof Room) ? room.name : room;
 
             return this.rooms.find(function (r) {
                 return (r.name === roomName);
             });
         }
     }, Object.create(Base.prototype));
-
+    Channel.prototype.constructor = Channel;
 
     // export the constructor
     module.exports = Channel;

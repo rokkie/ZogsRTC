@@ -18,19 +18,29 @@
 /**
  * Base class for Channels and Rooms
  *
- * @private
- * @class Base
+ * @class   Base
+ * @extends {Observable}
  */
 (function (module) {
+    // require dependencies
+    var Util       = require('../Util/Util.js'),
+        Observable = require('../Util/Observable.js');
 
     /**
      * Constructs a new Base
      *
      * @constructor
-     * @param   {String} name   Name of the object
+     * @param   {Object} config Key/Values to set
+     * @throws  {TypeError}     When config is not an object
      * @returns {Base}
      */
-    function Base (name) {
+    function Base (config) {
+        // properties
+        var name = undefined;
+
+        // call parent constructor
+        Observable.apply(this, [config]);
+
         // define properties with accessors and mutators
         Object.defineProperties(this, {
             /**
@@ -39,25 +49,46 @@
              */
             name: {
                 get: function () {
-                    return this.value;
+                    return name;
                 },
                 set: function (value) {
-                    if (undefined !== this.value) {
+                    if ('string' !== typeof value) {
+                        throw new Error('Name must me string');
+                    }
+                    if (undefined !== name) {
                         throw new Error('Name cannot change');
                     }
-                    if (undefined === name) {
-                        throw new Error('No name provided');
-                    }
-                    if (name.match(/[^a-z0-9\-\_]+/i)) {
+                    if (value.match(/[^a-z0-9\-\_]+/i)) {
                         throw new Error('Name contains illegal characters');
                     }
-                    this.value = value;
+                    name = value;
                 }
             }
         });
 
-        this.name = name;
+        // check argument
+        if (!(config instanceof Object)) {
+            throw new TypeError('Config should be object literal');
+        };
+
+        // set values in config object, triggering setters
+        for (var key in config) {
+            if (config.hasOwnProperty(key)) {
+                this[key] = config[key];
+            }
+        }
+
+        // check if name is present
+        if (undefined === this.name) {
+            throw new Error('No name has been set');
+        }
     }
+
+    // assign the prototype and constructor
+    Base.prototype = Util.copy({
+
+    }, Object.create(Observable.prototype));
+    Base.prototype.constructor = Base;
 
     // export the constructor
     module.exports = Base;

@@ -23,18 +23,19 @@
  */
 (function (module) {
     // require dependencies
-    var Base = require('./Base.js');
+    var Util = require('../Util/Util.js'),
+        Base = require('./Base.js');
 
     /**
      * Constructs a new Room
      *
      * @constructor
-     * @param   {String} name Room name
+     * @param   {Object} config Key/Values to set
      * @returns {Room}
      */
-    function Room (name) {
-        // call parent constructor
-        Base.apply(this, [name]);
+    function Room (config) {
+        // properties
+        var isPublic = true;
 
         // define properties with accessors and mutators
         Object.defineProperties(this, {
@@ -49,18 +50,23 @@
              */
             isPublic: {
                 get: function () {
-                    return this.value;
+                    return isPublic;
                 },
                 set: function (value) {
-                    this.value = (value) ? true : false;
+                    isPublic = (value) ? true : false;
                 }
             }
         });
+
+        // call parent constructor
+        Base.apply(this, [config]);
     }
 
     // assign the prototype and constructor
+    Room.prototype = Util.copy({
+
+    }, Object.create(Base.prototype));
     Room.prototype.constructor = Room;
-    Room.prototype             =  Object.create(Base.prototype);
 
     // export the constructor
     module.exports = Room;
