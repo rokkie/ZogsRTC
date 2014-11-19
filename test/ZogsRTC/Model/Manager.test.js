@@ -26,7 +26,7 @@ require('../../../src/polyfills');
     var shouldAddChannel = function (t) {
         var name1 = 'foo';
         var name2 = 'bar';
-        var mngr  = new Manager({ name: 'baz' });
+        var mngr  = new Manager();
 
         mngr.addChannel(name1);                        // using name
         mngr.addChannel(new Channel({ name: name2 })); // using instance
@@ -42,7 +42,7 @@ require('../../../src/polyfills');
 
     var shouldReturnChannel = function (t) {
         var name = 'foo';
-        var mngr = new Manager({ name: 'bar' });
+        var mngr = new Manager();
 
         var channel = mngr.addChannel(name);
 
@@ -51,8 +51,21 @@ require('../../../src/polyfills');
         t.done();
     };
 
+    var shouldNotAddSameChannelTwice = function (t) {
+        var name1 = 'foo';
+        var name2 = 'foo';
+        var mngr  = new Manager();
+
+        t.throws(function () {
+            mngr.addChannel(name1);
+            mngr.addChannel(name2);
+        }, Error, 'Should not allow adding a room with the same name');
+        t.done();
+    };
+
     module.exports = {
-        shouldAddChannel   : shouldAddChannel,
-        shouldReturnChannel: shouldReturnChannel
+        shouldAddChannel            : shouldAddChannel,
+        shouldReturnChannel         : shouldReturnChannel,
+        shouldNotAddSameChannelTwice: shouldNotAddSameChannelTwice
     };
 }(module));
