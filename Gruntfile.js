@@ -27,6 +27,10 @@ module.exports = function(grunt) {
             }
         },
 
+        clean: {
+            docs: ['./docs/jsapi']
+        },
+
         jshint: {
             all: [
                 './Gruntfile.js',
@@ -54,8 +58,9 @@ module.exports = function(grunt) {
 
         jsduck: {
             main: {
+                tasks  : ['clean:docs'],
                 src    : ['./src'],
-                dest   : 'docs/api',
+                dest   : 'docs/jsapi',
                 options: {
                     'builtin-classes': true,
                     'seo'            : true,
@@ -102,9 +107,10 @@ module.exports = function(grunt) {
     });
 
     // Load plugins
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-nodeunit');
+    grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-develop');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-istanbul');
