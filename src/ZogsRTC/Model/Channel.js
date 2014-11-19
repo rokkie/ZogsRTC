@@ -87,8 +87,8 @@
         /**
          * Add a new room to the channel if it does not already exist
          *
-         * @param   {Room} r Room or name
-         * @throws  {Error}  When tying to add a room with an existing name
+         * @param   {Room}  room Room or name
+         * @throws  {Error} When tying to add a room with an existing name
          * @returns {Room}
          */
         addRoom: function (room) {
