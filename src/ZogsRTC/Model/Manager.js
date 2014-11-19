@@ -74,20 +74,20 @@
         /**
          * Add a new channel if it does not already exist
          *
-         * @param   {Channel} c Channel or name
+         * @param   {Channel} channel Channel or name
          * @returns {Channel}
          */
-        addChannel: function (c) {
-            var channelName = (c instanceof Channel) ? c.name : c,
-                channel     = this.hasChannel(channelName);
-
-            if (!channel) {
-                channel = new Channel(channelName);
-                this.channels.push(channel);
-
-                this.emitter.emit('channeladd', channel);
+        addChannel: function (channel) {
+            if (this.hasChannel(channel)) {
+                throw new Error('A channel with the same name already exists');
             }
 
+            if (!(channel instanceof Channel)) {
+                channel = new Channel({ name: channel });
+            }
+
+            this.channels.push(channel);
+            this.emitter.emit('channeladd', channel);
             return channel;
         },
 
@@ -98,11 +98,10 @@
          * @returns {Channel}         Channel or undefined if not found
          */
         hasChannel: function (channel) {
-            var channels    = this.channels,
-                channelName = (channel instanceof Channel) ? channel.name : channel;
+            var channelName = (channel instanceof Channel) ? channel.name : channel;
 
-            return this.channels.find(function (c) {
-                return (c.name === channelName);
+            return this.channels.find(function (r) {
+                return (r.name === channelName);
             });
         }
     };
