@@ -49,7 +49,7 @@
          * @property {Array} channels Active channels
          */
         this.channels = [];
-    };
+    }
 
     // assign the prototype and constructor
     Manager.prototype = Util.copy({

@@ -58,7 +58,7 @@
 
         // register event listeners
         this.mngr.on('channeladd', this.onChannelAdd.bind(this));
-    };
+    }
 
     ChannelController.prototype = {
         /**
