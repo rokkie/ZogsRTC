@@ -22,8 +22,9 @@
  */
 (function (module) {
     // require dependencies
-    var events  = require('events'),
-        Channel = require('./Channel.js');
+    var Util       = require('../Util/Util.js'),
+        Observable = require('../Util/Observable.js'),
+        Channel    = require('./Channel.js');
 
     /**
      * Fires when a channel is added
@@ -38,12 +39,10 @@
      * @constructor
      * @returns {Manager}
      */
-    var Manager = function () {
-        /**
-         * @private
-         * @property {EventEmitter} emitter Event emitter
-         */
-        this.emitter = new events.EventEmitter();
+    function Manager () {
+
+        // call parent constructor
+        Observable.apply(this, arguments);
 
         /**
          * @readonly
@@ -52,15 +51,8 @@
         this.channels = [];
     };
 
-    Manager.prototype = {
-        /**
-         * @param  {String}   event    Event name
-         * @param  {Function} listener Callback
-         * @return {EventEmitter}      The event emitter
-         */
-        on: function (event, listener) {
-            this.emitter.on(event, listener);
-        },
+    // assign the prototype and constructor
+    Manager.prototype = Util.copy({
 
         /**
          * Get the available channels
@@ -87,7 +79,7 @@
             }
 
             this.channels.push(channel);
-            this.emitter.emit('channeladd', channel);
+            this.emit('channeladd', channel);
             return channel;
         },
 
@@ -104,7 +96,8 @@
                 return (r.name === channelName);
             });
         }
-    };
+    }, Object.create(Observable.prototype));
+    Manager.prototype.constructor = Manager;
 
     // export module
     module.exports = Manager;
