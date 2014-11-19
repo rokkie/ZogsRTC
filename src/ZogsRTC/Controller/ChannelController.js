@@ -30,11 +30,11 @@
      * Constructs a new ChannelController
      *
      * @constructor
-     * @param   {Server}  io     IO socket
-     * @param   {Manager} server The manager
+     * @param   {Server}  io    IO socket
+     * @param   {Manager} mngr  The manager
      * @returns {ChannelController}
      */
-    var ChannelController = function (io, mngr) {
+    function ChannelController (io, mngr) {
         if (!(io instanceof Server)) {
             throw new TypeError('Provided argument is not a Server');
         }
