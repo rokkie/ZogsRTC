@@ -87,12 +87,27 @@ require('../../../src/polyfills');
         t.done();
     };
 
+    var shouldOnlyUseOwnPropertiesAsConfigs = function (t) {
+        var ConfObj = function () {};
+        ConfObj.prototype.dummy = function () {};
+
+        var conf  = new ConfObj();
+        conf.foo  = 'bar';
+        conf.bar  = 'baz';
+        conf.name = 'qux';
+
+        var base = new Base(conf);
+
+        t.done();
+    };
+
     module.exports = {
         baseShouldRequireObjectLiteralAsConstructorArgument: baseShouldRequireObjectLiteralAsConstructorArgument,
         baseShouldNotAllowBlankName                        : baseShouldNotAllowBlankName,
         baseNameShouldBeString                             : baseNameShouldBeString,
         baseShouldSetName                                  : baseShouldSetName,
         baseShouldNotAllowNameChange                       : baseShouldNotAllowNameChange,
-        baseShouldNotAllowIllegalCharactersInName          : baseShouldNotAllowIllegalCharactersInName
+        baseShouldNotAllowIllegalCharactersInName          : baseShouldNotAllowIllegalCharactersInName,
+        shouldOnlyUseOwnPropertiesAsConfigs                : shouldOnlyUseOwnPropertiesAsConfigs
     };
 }(module));
