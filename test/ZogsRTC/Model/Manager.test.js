@@ -40,7 +40,19 @@ require('../../../src/polyfills');
         t.done();
     };
 
+    var shouldReturnChannel = function (t) {
+        var name = 'foo';
+        var mngr = new Manager({ name: 'bar' });
+
+        var channel = mngr.addChannel(name);
+
+        t.ok((channel instanceof Channel), 'Adding a channel does not return added instance');
+        t.equal(name, channel.name, 'Added channel does not have correct name');
+        t.done();
+    };
+
     module.exports = {
-        shouldAddChannel: shouldAddChannel
+        shouldAddChannel   : shouldAddChannel,
+        shouldReturnChannel: shouldReturnChannel
     };
 }(module));
