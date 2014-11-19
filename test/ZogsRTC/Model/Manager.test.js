@@ -63,9 +63,22 @@ require('../../../src/polyfills');
         t.done();
     };
 
+    var shouldEmitEventOnAddChannel = function (t) {
+        var event = 'channeladd';
+        var name  = 'foo';
+        var mngr  = new Manager();
+
+        mngr.on(event, function (channel) {
+            t.equal(name, channel.name);
+            t.done();
+        });
+        mngr.addChannel(name);
+    };
+
     module.exports = {
         shouldAddChannel            : shouldAddChannel,
         shouldReturnChannel         : shouldReturnChannel,
-        shouldNotAddSameChannelTwice: shouldNotAddSameChannelTwice
+        shouldNotAddSameChannelTwice: shouldNotAddSameChannelTwice,
+        shouldEmitEventOnAddChannel : shouldEmitEventOnAddChannel
     };
 }(module));
