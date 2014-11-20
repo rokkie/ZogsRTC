@@ -37,7 +37,7 @@
             });
 
 
-            router.get('/', channelCtrl.listChannels.bind(channelCtrl));
+            router.get('/channels', channelCtrl.listChannels.bind(channelCtrl));
             router.get('/:channelName', channelCtrl.readChannel.bind(channelCtrl));
 
             return router;
