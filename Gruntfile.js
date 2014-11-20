@@ -71,7 +71,26 @@ module.exports = function(grunt) {
 
         develop: {
             server: {
-                file: './index.js'
+                tasks  : ['node-inspector'],
+                file    : './index.js',
+                nodeArgs: ['--debug']
+            }
+        },
+
+        'node-inspector': {
+            dev: {
+                options: {
+                    'web-port'      : 8080,
+                    'web-host'      : 'localhost',
+                    'debug-port'    : 5857,
+                    'save-live-edit': true,
+                    'hidden'        : [
+                        'docs',
+                        'nbproject',
+                        'node_modules',
+                        'test'
+                    ]
+                }
             }
         },
 
@@ -115,9 +134,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-istanbul');
     grunt.loadNpmTasks('grunt-jsduck');
+    grunt.loadNpmTasks('grunt-node-inspector');
 
-    // Default task(s).
-    grunt.registerTask('default', ['develop']);
+    // Default task(s)
+    grunt.registerTask('default', ['develop:server', 'node-inspector:dev', 'watch']);
     grunt.registerTask('coverage', ['env:coverage', 'instrument', 'nodeunit', 'storeCoverage', 'makeReport']);
-
 };
