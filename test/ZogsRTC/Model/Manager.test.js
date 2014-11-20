@@ -72,10 +72,12 @@ require('../../../src/polyfills');
         var name2 = 'foo';
         var mngr  = new Manager();
 
-        t.throws(function () {
-            mngr.addChannel(name1);
-            mngr.addChannel(name2);
-        }, Error, 'Should not allow adding a room with the same name');
+        mngr.addChannel(name1);
+        mngr.addChannel(new Channel({ name: name2 }));
+
+        var count = mngr.getChannelCount();
+        t.equal(1, count, 'Should not allow adding a room with the same name');
+
         t.done();
     };
 

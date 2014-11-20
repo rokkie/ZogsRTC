@@ -79,16 +79,15 @@
          * @returns {Channel}
          */
         addChannel: function (channel) {
-            if (this.hasChannel(channel)) {
-                throw new Error('A channel with the same name already exists');
-            }
-
             if (!(channel instanceof Channel)) {
                 channel = new Channel({ name: channel });
             }
 
-            this.channels.push(channel);
-            this.emit('channeladd', channel);
+            if (!this.hasChannel(channel)) {
+                this.channels.push(channel);
+                this.emit('channeladd', channel);
+            }
+
             return channel;
         },
 
