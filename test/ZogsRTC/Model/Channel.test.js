@@ -130,13 +130,26 @@ require('../../../src/polyfills');
         t.done();
     };
 
+    var shouldFindExistingRoomByName = function (t) {
+        var name    = 'foo';
+        var room    = new Room({ name: name });
+        var channel = new Channel({ name: 'bar' });
+
+        channel.addRoom(room);
+
+        t.ok(channel.hasRoom(name), 'Room was added but not found');
+
+        t.done();
+    };
+
     module.exports = {
-        shouldAddRoom             : shouldAddRoom,
-        shouldCountRooms          : shouldCountRooms,
-        shouldReturnRoom          : shouldReturnRoom,
-        shouldNotAddSameRoomTwice : shouldNotAddSameRoomTwice,
-        shouldEmitEventOnAddRoom  : shouldEmitEventOnAddRoom,
-        shouldNotReturnPrivateRoom: shouldNotReturnPrivateRoom,
-        shouldReturnCorrectInfo   : shouldReturnCorrectInfo
+        shouldAddRoom               : shouldAddRoom,
+        shouldCountRooms            : shouldCountRooms,
+        shouldReturnRoom            : shouldReturnRoom,
+        shouldNotAddSameRoomTwice   : shouldNotAddSameRoomTwice,
+        shouldEmitEventOnAddRoom    : shouldEmitEventOnAddRoom,
+        shouldNotReturnPrivateRoom  : shouldNotReturnPrivateRoom,
+        shouldReturnCorrectInfo     : shouldReturnCorrectInfo,
+        shouldFindExistingRoomByName: shouldFindExistingRoomByName
     };
 }(module));
