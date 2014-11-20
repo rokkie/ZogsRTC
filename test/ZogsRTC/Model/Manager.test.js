@@ -76,7 +76,7 @@ require('../../../src/polyfills');
         mngr.addChannel(new Channel({ name: name2 }));
 
         var count = mngr.getChannelCount();
-        t.equal(1, count, 'Should not allow adding a room with the same name');
+        t.equal(1, count, 'Should not allow adding a channel with the same name');
 
         t.done();
     };
