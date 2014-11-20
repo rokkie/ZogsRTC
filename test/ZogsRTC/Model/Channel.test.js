@@ -56,7 +56,7 @@ require('../../../src/polyfills');
         t.done();
     };
 
-    var shouldReturnRoom = function (t) {
+    var shouldReturnAddedRoom = function (t) {
         var name    = 'foo';
         var channel = new Channel({ name: 'bar' });
 
@@ -145,7 +145,7 @@ require('../../../src/polyfills');
     module.exports = {
         shouldAddRoom               : shouldAddRoom,
         shouldCountRooms            : shouldCountRooms,
-        shouldReturnRoom            : shouldReturnRoom,
+        shouldReturnAddedRoom       : shouldReturnAddedRoom,
         shouldNotAddSameRoomTwice   : shouldNotAddSameRoomTwice,
         shouldEmitEventOnAddRoom    : shouldEmitEventOnAddRoom,
         shouldNotReturnPrivateRoom  : shouldNotReturnPrivateRoom,
