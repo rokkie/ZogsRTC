@@ -20,30 +20,12 @@
     require('./src/polyfills');
     var express = require('express'),
         app     = express(),
-        router  = express.Router(),
         http    = require('http').Server(app),
-        io      = require('socket.io')(http),
-        zogsrtc = require('./src/ZogsRTC.js'),
+        io      = require('socket.io')(http);
 
-        // ..
-        mngr        = new zogsrtc.Model.Manager(),
-        channelCtrl = new zogsrtc.Ctrl.ChannelController(io, mngr);
+    var routes = require('./src/routes/channels')(io);
 
-
-    // TODO: move to somewhere..
-    router.param('channelName', function (req, res, next, channelName) {
-        if (channelName.match(/[^a-z0-9\-\_]+/i)) {
-            return;
-        }
-
-        req.channelName = channelName;
-        next();
-    });
-
-    router.get('/', channelCtrl.listChannels.bind(channelCtrl));
-    router.get('/:channelName', channelCtrl.readChannel.bind(channelCtrl));
-
-    app.use('/', router);
+    app.use('/', routes);
 
     // ...
     http.listen(config.port, function () {
