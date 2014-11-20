@@ -27,33 +27,11 @@ module.exports = function(grunt) {
             }
         },
 
+        /**
+         * Documentation
+         */
         clean: {
             docs: ['./docs/jsapi']
-        },
-
-        jshint: {
-            all: [
-                './Gruntfile.js',
-                './index.js',
-                './src/ZogsRTC/**/*.js',
-                './src/ZogsRTC.js',
-                './test/ZogsRTC/**/*.js',
-                './test/ZogsRTC.js'
-            ]
-        },
-
-        watch: {
-            js: {
-                tasks  : ['develop'],
-                options: {
-                    nospawn: true
-                },
-                files  : [
-                    './index.js',
-                    './src/ZogsRTC/**/*.js',
-                    './src/ZogsRTC.js'
-                ]
-            }
         },
 
         jsduck: {
@@ -69,11 +47,39 @@ module.exports = function(grunt) {
             }
         },
 
+        /**
+         * Development
+         */
+        jshint: {
+            all: [
+                './Gruntfile.js',
+                './index.js',
+                './src/ZogsRTC/**/*.js',
+                './src/ZogsRTC.js',
+                './test/ZogsRTC/**/*.js',
+                './test/ZogsRTC.js'
+            ]
+        },
+
         develop: {
             server: {
                 tasks  : ['node-inspector'],
                 file    : './index.js',
                 nodeArgs: ['--debug']
+            }
+        },
+
+        watch: {
+            js: {
+                tasks  : ['develop'],
+                options: {
+                    nospawn: true
+                },
+                files  : [
+                    './index.js',
+                    './src/ZogsRTC/**/*.js',
+                    './src/ZogsRTC.js'
+                ]
             }
         },
 
@@ -94,6 +100,9 @@ module.exports = function(grunt) {
             }
         },
 
+        /*
+         * Unit-Testing
+         */
         instrument: {
             files  : './src/**/*.js',
             options: {
