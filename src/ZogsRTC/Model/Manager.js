@@ -55,6 +55,15 @@
     Manager.prototype = Util.copy({
 
         /**
+         * Get the amount of channels
+         *
+         * @returns {Number}
+         */
+        getChannelCount: function () {
+            return this.channels.length;
+        },
+
+        /**
          * Get the available channels
          *
          * @returns {Array}

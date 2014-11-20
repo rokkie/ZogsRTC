@@ -40,6 +40,22 @@ require('../../../src/polyfills');
         t.done();
     };
 
+    var shouldCountChannels = function (t) {
+        var name1 = 'foo';
+        var name2 = 'bar';
+        var name3 = 'baz';
+        var mngr  = new Manager();
+
+        mngr.addChannel(name1);
+        mngr.addChannel(name2);
+        mngr.addChannel(name3);
+
+        var count = mngr.getChannelCount();
+        t.equal(3, count, '3 channels were added but ' + count + ' were counted');
+
+        t.done();
+    };
+
     var shouldReturnChannel = function (t) {
         var name = 'foo';
         var mngr = new Manager();
@@ -75,10 +91,24 @@ require('../../../src/polyfills');
         mngr.addChannel(name);
     };
 
+    var shouldFindExistingChannelByName = function (t) {
+        var name    = 'foo';
+        var channel = new Channel({ name: name });
+        var mngr    = new Manager();
+
+        mngr.addChannel(channel);
+
+        t.ok(mngr.hasChannel(name), 'Channel was added but not found');
+
+        t.done();
+    };
+
     module.exports = {
-        shouldAddChannel            : shouldAddChannel,
-        shouldReturnChannel         : shouldReturnChannel,
-        shouldNotAddSameChannelTwice: shouldNotAddSameChannelTwice,
-        shouldEmitEventOnAddChannel : shouldEmitEventOnAddChannel
+        shouldAddChannel               : shouldAddChannel,
+        shouldCountChannels            : shouldCountChannels,
+        shouldReturnChannel            : shouldReturnChannel,
+        shouldNotAddSameChannelTwice   : shouldNotAddSameChannelTwice,
+        shouldEmitEventOnAddChannel    : shouldEmitEventOnAddChannel,
+        shouldFindExistingChannelByName: shouldFindExistingChannelByName
     };
 }(module));
