@@ -40,6 +40,22 @@ require('../../../src/polyfills');
         t.done();
     };
 
+    var shouldCountRooms = function (t) {
+        var name1   = 'foo';
+        var name2   = 'bar';
+        var name3   = 'baz';
+        var channel = new Channel({ name: 'qux' });
+
+        channel.addRoom(name1);
+        channel.addRoom(name2);
+        channel.addRoom(name3);
+
+        var count = channel.getRoomCount();
+        t.equal(3, count, '3 rooms were added but ' + count + ' were counted');
+
+        t.done();
+    };
+
     var shouldReturnRoom = function (t) {
         var name    = 'foo';
         var channel = new Channel({ name: 'bar' });
@@ -114,6 +130,7 @@ require('../../../src/polyfills');
 
     module.exports = {
         shouldAddRoom             : shouldAddRoom,
+        shouldCountRooms          : shouldCountRooms,
         shouldReturnRoom          : shouldReturnRoom,
         shouldNotAddSameRoomTwice : shouldNotAddSameRoomTwice,
         shouldEmitEventOnAddRoom  : shouldEmitEventOnAddRoom,

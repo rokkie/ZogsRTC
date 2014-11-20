@@ -57,6 +57,16 @@
 
     // assign the prototype and constructor
     Channel.prototype = Util.copy({
+
+        /**
+         * Get the amount of rooms
+         *
+         * @returns {Number}
+         */
+        getRoomCount: function () {
+            return this.rooms.length;
+        },
+
         /**
          * Get information about this room
          *
