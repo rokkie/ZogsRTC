@@ -72,10 +72,12 @@ require('../../../src/polyfills');
         var name2   = 'foo';
         var channel = new Channel({ name: 'bar' });
 
-        t.throws(function () {
-            channel.addRoom(name1);
-            channel.addRoom(name2);
-        }, Error, 'Should not allow adding a room with the same name');
+        channel.addRoom(name1);
+        channel.addRoom(new Room({ name: name2 }));
+
+        var count = channel.getRoomCount();
+        t.equal(1, count, 'Should not allow adding a room with the same name');
+
         t.done();
     };
 

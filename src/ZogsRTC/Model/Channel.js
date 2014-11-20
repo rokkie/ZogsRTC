@@ -98,20 +98,18 @@
          * Add a new room to the channel if it does not already exist
          *
          * @param   {Room}  room Room or name
-         * @throws  {Error} When tying to add a room with an existing name
          * @returns {Room}
          */
         addRoom: function (room) {
-            if (this.hasRoom(room)) {
-                throw new Error('A room with the same name already exists');
-            }
-
             if (!(room instanceof Room)) {
                 room = new Room({ name: room });
             }
 
-            this.rooms.push(room);
-            this.emit('roomadd', room);
+            if (!this.hasRoom(room)) {
+                this.rooms.push(room);
+                this.emit('roomadd', room);
+            }
+
             return room;
         },
 
