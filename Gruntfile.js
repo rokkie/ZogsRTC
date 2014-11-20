@@ -63,7 +63,7 @@ module.exports = function(grunt) {
 
         develop: {
             server: {
-                tasks  : ['node-inspector'],
+                tasks   : ['node-inspector'],
                 file    : './index.js',
                 nodeArgs: ['--debug']
             }

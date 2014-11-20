@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
  * Copyright (C) 2014 rocco
  *
@@ -15,14 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Application entry point
- */
 (function () {
-    var app = require('./app.js');
-
-    app.set('port', process.env.PORT || 3000);
-    var server = app.listen(app.get('port'), function () {
-        console.log('Signaling server listening on port ' + server.address().port);
-    });
+    var app = require('../index.js');
 }());

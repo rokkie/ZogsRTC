@@ -2,12 +2,17 @@
   "name": "ZogsRTC",
   "version": "1.0.0",
   "description": "Zogs' WebRTC app",
-  "main": "index.js",
+  "main": "app.js",
+  "bin": {
+    "zogs-signal": "./bin/zogs-signal"
+  },
   "directories": {
+    "bin": "bin",
     "test": "test"
   },
   "scripts": {
-    "test": "grunt nodeunit"
+    "test": "grunt nodeunit",
+    "start": "./bin/zogs-signal"
   },
   "repository": {
     "type": "git",

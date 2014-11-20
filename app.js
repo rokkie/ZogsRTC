@@ -16,13 +16,19 @@
  */
 
 /**
- * Application entry point
+ * Main application
  */
-(function () {
-    var app = require('./app.js');
+(function (module) {
+    // require dependencies
+    require('./src/polyfills');
+    var express = require('express'),
+        app     = express(),
+        http    = require('http').Server(app),
+        io      = require('socket.io')(http);
 
-    app.set('port', process.env.PORT || 3000);
-    var server = app.listen(app.get('port'), function () {
-        console.log('Signaling server listening on port ' + server.address().port);
-    });
-}());
+    var routes = require('./src/routes/channels')(io);
+
+    app.use('/', routes);
+
+    module.exports = app;
+}(module));
