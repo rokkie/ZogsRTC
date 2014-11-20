@@ -56,7 +56,7 @@ require('../../../src/polyfills');
         t.done();
     };
 
-    var shouldReturnChannel = function (t) {
+    var shouldReturnAddedChannel = function (t) {
         var name = 'foo';
         var mngr = new Manager();
 
@@ -108,7 +108,7 @@ require('../../../src/polyfills');
     module.exports = {
         shouldAddChannel               : shouldAddChannel,
         shouldCountChannels            : shouldCountChannels,
-        shouldReturnChannel            : shouldReturnChannel,
+        shouldReturnAddedChannel       : shouldReturnAddedChannel,
         shouldNotAddSameChannelTwice   : shouldNotAddSameChannelTwice,
         shouldEmitEventOnAddChannel    : shouldEmitEventOnAddChannel,
         shouldFindExistingChannelByName: shouldFindExistingChannelByName
