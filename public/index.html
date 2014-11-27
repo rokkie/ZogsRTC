@@ -23,8 +23,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script type="text/javascript" src="js/lib/adapter.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
 </head>
 <body>
-    <!-- WebRTC be here -->
+    <h1>RTCFTW!</h1>
+
+    <div style="width: 325px; float: left">
+        <p>Local View</p>
+        <video id="local-view" width="320" height="240" autoplay="autoplay"></video>
+    </div>
+    <div style="width: 325px; float: left">
+        <p>Remote View</p>
+        <video id="remote-view" width="320" height="240" autoplay="autoplay"></video>
+    </div>
+    <div style="clear: both;"><!-- --></div>
+    <button id="call-btn">E.T. phone home!</button>
+    <button id="answer-btn">Pick up!</button>
+    <button id="hangup-btn">Hang up!</button>
 </body>
 </html>
