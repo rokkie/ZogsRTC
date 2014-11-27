@@ -23,12 +23,6 @@ var App = function () {
                 iceServers: [{
                     url: 'stun:stun.l.google.com:19302'
                 }]
-            },
-            io: {
-                channel      : 'RokkieRTC',
-                publish_key  : 'pub-c-1697c026-2d36-43e5-af7b-7f5345402e17',
-                subscribe_key: 'sub-c-0940cdb2-2f4e-11e4-b3c3-02ee2ddab7fe',
-                presence     : false
             }
         };
 
@@ -39,7 +33,6 @@ var App = function () {
     me.answerBtn      = doc.getElementById('answer-btn');
     me.hangupBtn      = doc.getElementById('hangup-btn');
     me.peerConnection = new RTCPeerConnection(cfg.pc);
-//    me.socket         = io.connect('http://pubsub.pubnub.com/webtrc-testapp', cfg.io);
     me.socket         = io.connect('http://127.0.0.1:3000');
 
     me.callBtn.disabled   = false;
