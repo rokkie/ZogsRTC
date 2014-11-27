@@ -19,12 +19,5 @@
  * Application entry point
  */
 (function () {
-    var app = require('./app.js');
-
-    app.set('port', process.env.PORT || 3000);
-
-    var server = app.listen(app.get('port'), function () {
-        var addr = server.address();
-        console.log('Signaling server listening on http://%s:%s', addr.address, addr.port);
-    });
+    require('./app.js').run();
 }());

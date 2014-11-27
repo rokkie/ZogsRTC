@@ -30,5 +30,18 @@
 
     app.use('/', routes);
 
-    module.exports = app;
+    var run = function (host, port) {
+        app.set('port', port || process.env.PORT || 3000);
+        app.set('host', host || 'localhost');
+
+        var server = http.listen(app.get('port'), app.get('host'), function () {
+            var addr   = server.address(),
+                msgTpl = 'Signaling server listening on http://%s:%s';
+            console.log(msgTpl, addr.address, addr.port);
+        });
+    };
+
+    module.exports = {
+        run: run
+    };
 }(module));
