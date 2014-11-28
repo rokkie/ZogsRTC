@@ -30,6 +30,20 @@
 
     app.use('/', routes);
 
+
+    // ------- temporary implementation for testing
+    io.on('connection', function (socket) {
+        socket.on('call', function (msg) {
+            socket.broadcast.emit('call', msg);
+        });
+
+        socket.on('candidate', function (msg) {
+            socket.broadcast.emit('candidate', msg);
+        });
+    });
+    // -------
+
+
     var run = function (host, port) {
         app.set('port', port || process.env.PORT || 3000);
         app.set('host', host || 'localhost');
