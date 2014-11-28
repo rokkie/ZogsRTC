@@ -20,11 +20,14 @@ var App = function () {
         doc = document;
 
     // store references to DOM elements that we need
-    me.localView  = doc.getElementById('local-view');
-    me.remoteView = doc.getElementById('remote-view');
-    me.callBtn    = doc.getElementById('call-btn');
-    me.answerBtn  = doc.getElementById('answer-btn');
-    me.hangupBtn  = doc.getElementById('hangup-btn');
+    me.localView   = doc.getElementById('local-view');
+    me.remoteView  = doc.getElementById('remote-view');
+    me.messageView = doc.getElementById('message-view');
+    me.callBtn     = doc.getElementById('call-btn');
+    me.answerBtn   = doc.getElementById('answer-btn');
+    me.hangupBtn   = doc.getElementById('hangup-btn');
+    me.sendMsgBtn  = doc.getElementById('send-msg-btn');
+    me.msgInput    = doc.getElementById('msg-input');
 
     // define resources that we will be using
     me.sendingChannel = undefined;
@@ -37,9 +40,10 @@ var App = function () {
     });
 
     // set initial button states
-    me.callBtn.disabled   = false;
-    me.answerBtn.disabled = true;
-    me.hangupBtn.disabled = true;
+    me.callBtn.disabled    = false;
+    me.answerBtn.disabled  = true;
+    me.hangupBtn.disabled  = true;
+    me.sendMsgBtn.disabled = true;
 
     // register listeners
     me.socket.on('candidate', me.onCandidate.bind(me));
@@ -48,6 +52,7 @@ var App = function () {
     me.callBtn.addEventListener('click', me.onCallBtnClick.bind(me));
     me.answerBtn.addEventListener('click', me.onAnswerBtnClick.bind(me));
     me.hangupBtn.addEventListener('click', me.onHangupBtnClick.bind(me));
+    me.sendMsgBtn.addEventListener('click', me.onSendMsgBtnClick.bind(me));
 
     me.peerConnection.addEventListener('addstream', me.onAddStream.bind(me));
     me.peerConnection.addEventListener('icecandidate', me.onIceCandidate.bind(me));
@@ -112,6 +117,39 @@ App.prototype = {
         me.callBtn.disabled   = false;
         me.answerBtn.disabled = true;
         me.hangupBtn.disabled = true;
+    },
+
+    /**
+     *
+     * @param   {Event} evt
+     * @returns {void}
+     */
+    onSendMsgBtnClick: function (evt) {
+        var me  = this,
+            src = 'local',
+            msg = me.msgInput.value;
+
+        me.addChatMessage(msg, src);
+        me.sendingChannel.send(msg);
+        me.msgInput.value = null;
+    },
+
+    /**
+     *
+     * @param   {String} message
+     * @param   {String} source
+     * @returns {void}
+     */
+    addChatMessage: function (message, source) {
+        var me  = this,
+            doc = document,
+            txt = doc.createTextNode(message),
+            el  = doc.createElement('span');
+
+        el.classList.add('chat-msg', source);
+        el.appendChild(txt);
+
+        me.messageView.appendChild(el);
     },
 
     /**
@@ -356,6 +394,7 @@ App.prototype = {
     onDataChannelOpen: function (evt) {
         var me = this;
 
+        me.sendMsgBtn.disabled = false;
     },
 
     /**
@@ -364,8 +403,11 @@ App.prototype = {
      * @returns {void}
      */
     onDataChannelMessage: function (evt) {
-        var me = this;
+        var me  = this,
+            src = 'remote',
+            msg = evt.data;
 
+        me.addChatMessage(msg, src);
     },
 
     /**
@@ -376,6 +418,7 @@ App.prototype = {
     onDataChannelClose: function (evt) {
         var me = this;
 
+        me.sendMsgBtn.disabled = true;
     },
 
     /**
