@@ -1,0 +1,50 @@
+/*
+Copyright (C) 2014 rocco
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+/*
+    Created on : Nov 28, 2014, 4:06:04 PM
+    Author     : rocco
+*/
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000322}}
+.clear {
+  clear: both; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000326}}
+.video-ct {
+  width: 325px;
+  float: left; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000331}}
+#message-view {
+  width: 650px;
+  height: 200px;
+  margin: 10px 0;
+  border: 1px solid #000;
+  overflow-y: auto; }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000338}}
+  #message-view span.chat-msg {
+    margin: 5px;
+    display: block; }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000343}}
+  #message-view span.chat-msg.local {
+    text-align: left; }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000347}}
+  #message-view span.chat-msg.remote {
+    text-align: right; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000352}}
+#msg-input {
+  width: 600px; }

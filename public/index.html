@@ -24,26 +24,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script type="text/javascript" src="js/lib/adapter.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+
+    <link type="text/css" href="css/style.css" rel="stylesheet" />
 </head>
 <body>
     <h1>RTCFTW!</h1>
 
-    <div style="width: 325px; float: left">
+    <div class="video-ct">
         <p>Local View</p>
         <video id="local-view" width="320" height="240" autoplay="autoplay"></video>
     </div>
-    <div style="width: 325px; float: left">
+    <div class="video-ct">
         <p>Remote View</p>
         <video id="remote-view" width="320" height="240" autoplay="autoplay"></video>
     </div>
-    <div style="clear: both;"><!-- --></div>
+    <div class="clear"><!-- --></div>
     <button id="call-btn">E.T. phone home!</button>
     <button id="answer-btn">Pick up!</button>
     <button id="hangup-btn">Hang up!</button>
 
     <div>
-        <div id="message-view" style="width: 650px; height: 200px; margin: 10px 0; border: 1px solid #000;"></div>
-        <input type="text" id="msg-input" name="message" placeholder="Type a message" style="width: 600px;">
+        <div id="message-view"></div>
+        <input type="text" id="msg-input" name="message" placeholder="Type a message">
         <button id="send-msg-btn">Fire!</button>
     </div>
 
