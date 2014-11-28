@@ -432,7 +432,7 @@ App.prototype = {
     }
 };
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
     var app = new App();
 
     // global access for debugging
