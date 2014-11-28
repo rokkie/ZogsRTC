@@ -16,25 +16,27 @@
  */
 
 var App = function () {
-    var me     = this,
-        doc    = document,
-        cfg    = {
-            pc: {
-                iceServers: [{
-                    url: 'stun:stun.l.google.com:19302'
-                }]
-            }
-        };
+    var me  = this,
+        doc = document;
 
-    // assign properties
-    me.localView      = doc.getElementById('local-view');
-    me.remoteView     = doc.getElementById('remote-view');
-    me.callBtn        = doc.getElementById('call-btn');
-    me.answerBtn      = doc.getElementById('answer-btn');
-    me.hangupBtn      = doc.getElementById('hangup-btn');
-    me.peerConnection = new RTCPeerConnection(cfg.pc);
+    // store references to DOM elements that we need
+    me.localView  = doc.getElementById('local-view');
+    me.remoteView = doc.getElementById('remote-view');
+    me.callBtn    = doc.getElementById('call-btn');
+    me.answerBtn  = doc.getElementById('answer-btn');
+    me.hangupBtn  = doc.getElementById('hangup-btn');
+
+    // define resources that we will be using
+    me.sendingChannel = undefined;
+    me.receiveChannel = undefined;
     me.socket         = io.connect('http://127.0.0.1:3000');
+    me.peerConnection = new RTCPeerConnection({
+        iceServers: [{
+            url: 'stun:stun.l.google.com:19302'
+        }]
+    });
 
+    // set initial button states
     me.callBtn.disabled   = false;
     me.answerBtn.disabled = true;
     me.hangupBtn.disabled = true;
