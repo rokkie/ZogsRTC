@@ -49,6 +49,8 @@ var App = function () {
 
     me.peerConnection.addEventListener('addstream', me.onAddStream.bind(me));
     me.peerConnection.addEventListener('icecandidate', me.onIceCandidate.bind(me));
+    me.peerConnection.addEventListener('iceconnectionstatechange', me.onIceConnectionStateChange.bind(me));
+    me.peerConnection.addEventListener('datachannel', me.onDataChannel.bind(me));
 };
 
 App.prototype = {
@@ -69,6 +71,7 @@ App.prototype = {
                 failure = me.onCreateOfferOrAnswerFailure.bind(me);
 
             me.onGumSuccess(stream);
+            me.createSendingDataChannel('caller');
             me.peerConnection.createOffer(success, failure);
         }.bind(me), me.onGumFailure.bind(me));
     },
@@ -89,6 +92,7 @@ App.prototype = {
                 failure = me.onCreateOfferOrAnswerFailure.bind(me);
 
             me.onGumSuccess(stream);
+            me.createSendingDataChannel('caller');
             me.peerConnection.createAnswer(success, failure);
         }.bind(me), me.onGumFailure.bind(me));
     },
@@ -282,6 +286,104 @@ App.prototype = {
         var me = this;
 
         throw new Error(error);
+    },
+
+    /**
+     *
+     * @param   {Event} evt
+     * @returns {void}
+     */
+    onIceConnectionStateChange: function (evt) {
+        var me = this,
+            pc = evt.target;
+
+        switch (pc.iceConnectionState) {
+            case 'connected':
+
+                break;
+
+            default:
+                break;
+        }
+    },
+
+    /**
+     *
+     * @param   {RTCDataChannelEvent} evt
+     * @returns {void}
+     */
+    onDataChannel: function (evt) {
+        var me = this;
+
+        me.receiveChannel = evt.channel;
+        me.attachDataChannelListeners(me.receiveChannel)
+    },
+
+    /**
+     *
+     * @param   {String} label
+     * @returns {void}
+     */
+    createSendingDataChannel: function (label) {
+        var me          = this,
+            dataChannel = me.peerConnection.createDataChannel(label);
+
+        me.attachDataChannelListeners(dataChannel);
+        me.sendingChannel = dataChannel;
+    },
+
+    /**
+     *
+     * @param   {RTCDataChannel} dataChannel
+     * @returns {void}
+     */
+    attachDataChannelListeners: function (dataChannel) {
+        var me = this;
+
+        dataChannel.addEventListener('open', me.onDataChannelOpen.bind(me));
+        dataChannel.addEventListener('message', me.onDataChannelMessage.bind(me));
+        dataChannel.addEventListener('close', me.onDataChannelClose.bind(me));
+        dataChannel.addEventListener('error', me.onDataChannelError.bind(me));
+    },
+
+    /**
+     *
+     * @param   {Event} evt
+     * @returns {void}
+     */
+    onDataChannelOpen: function (evt) {
+        var me = this;
+
+    },
+
+    /**
+     *
+     * @param   {MessageEvent} event
+     * @returns {void}
+     */
+    onDataChannelMessage: function (evt) {
+        var me = this;
+
+    },
+
+    /**
+     *
+     * @param   {Event} evt
+     * @returns {void}
+     */
+    onDataChannelClose: function (evt) {
+        var me = this;
+
+    },
+
+    /**
+     *
+     * @param   {Event} evt
+     * @returns {void}
+     */
+    onDataChannelError: function (evt) {
+        var me = this;
+
     }
 };
 
