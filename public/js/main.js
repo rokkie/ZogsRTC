@@ -56,15 +56,20 @@ var App = function () {
 
     me.peerConnection.addEventListener('addstream', me.onAddStream.bind(me));
     me.peerConnection.addEventListener('icecandidate', me.onIceCandidate.bind(me));
-    me.peerConnection.addEventListener('iceconnectionstatechange', me.onIceConnectionStateChange.bind(me));
     me.peerConnection.addEventListener('datachannel', me.onDataChannel.bind(me));
 };
 
 App.prototype = {
 
     /**
+     * Event handler for when 'Call' button is clicked.
+     * Prompts GetUserMedia asking the user permission to access the camera.
+     * Video stream is captured when access is granted and passed to callback function.
+     * A data channel to use for sending is then created.
+     * An 'offer' is created that we can send over he signaling channel letting
+     * the callee know we're calling him/her.
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The click event
      * @returns {void}
      */
     onCallBtnClick: function (evt) {
@@ -78,14 +83,22 @@ App.prototype = {
                 failure = me.onCreateOfferOrAnswerFailure.bind(me);
 
             me.onGumSuccess(stream);
-            me.createSendingDataChannel('caller');
+            me.createSendingDataChannel('sending');
+
+            // this differs from 'onAnswerBtnClick'
             me.peerConnection.createOffer(success, failure);
         }.bind(me), me.onGumFailure.bind(me));
     },
 
     /**
+     * Event handler for when 'Answer' button is clicked.
+     * Prompts GetUserMedia asking the user permission to access the camera.
+     * Video stream is captured when access is granted and passed to callback function.
+     * A data channel to use for sending is then created.
+     * An 'answer' is created that we can send over he signaling channel letting
+     * the caller know we're answering him/her.
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The click event
      * @returns {void}
      */
     onAnswerBtnClick: function (evt) {
@@ -99,14 +112,19 @@ App.prototype = {
                 failure = me.onCreateOfferOrAnswerFailure.bind(me);
 
             me.onGumSuccess(stream);
-            me.createSendingDataChannel('caller');
+            me.createSendingDataChannel('sending');
+
+            // this differs from 'onCallBtnClick'
             me.peerConnection.createAnswer(success, failure);
         }.bind(me), me.onGumFailure.bind(me));
     },
 
     /**
+     * Event handler for when 'Hang up' button is clicked.
+     * Closes peer connection.
+     * Sets button states accordingly.
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The click event
      * @returns {void}
      */
     onHangupBtnClick: function (evt) {
@@ -120,8 +138,12 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when 'Send' button is clicked.
+     * Reads value from input field (the message).
+     * Add the message as 'local' (left side) to the message view.
+     * Send the message over the data channel.
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The click event
      * @returns {void}
      */
     onSendMsgBtnClick: function (evt) {
@@ -135,9 +157,11 @@ App.prototype = {
     },
 
     /**
+     * Add a chat message to the view.
+     * Creates a bit of markup and appends it to the message view.
      *
-     * @param   {String} message
-     * @param   {String} source
+     * @param   {String} message    The message to add
+     * @param   {String} source     Where the message originated from local|remote
      * @returns {void}
      */
     addChatMessage: function (message, source) {
@@ -153,42 +177,54 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when GetUserMedia successfully captured a stream.
+     * Converts the stream to a URL that can be handled by HTML video and
+     * set use it as source for the local video.
+     * Add the stream to the peer connection.
      *
-     * @param   {MediaStream} stream
+     * @param   {MediaStream} stream    The captured camera stream
      * @returns {void}
      */
     onGumSuccess: function (stream) {
         var me = this;
 
         me.localView.src = URL.createObjectURL(stream);
-        me.peerConnection.addStream(stream);
+        me.peerConnection.addStream(stream);    // does not trigger 'onaddstream'
     },
 
     /**
+     * Callback for when GetUserMedia failed,
+     * e.g. access to camera was denied.
+     * Re-throws error
      *
-     * @param   {NavigatorUserMediaError} error
+     * @param   {NavigatorUserMediaError} error The error raised by GetUserMedia
      * @returns {void}
+     * @throws  {NavigatorUserMediaError}
      */
     onGumFailure: function (error) {
         throw error;
     },
 
     /**
+     * Event handler for when a call offer was successfully created.
+     * Sets the session description as being the local one on the peer connection.
      *
-     * @param   {RTCSessionDescription} description
+     * @param   {RTCSessionDescription} description The local session description to be sent over the signaling channel
      * @returns {void}
      */
     onCreateOfferOrAnswerSuccess: function (description) {
         var me      = this,
-            success = me.onLocalChannelDescriptionSuccess.bind(me, description),
-            failure = me.onLocalChannelDescriptionFailure.bind(me);
+            success = me.onLocalDescriptionSuccess.bind(me, description),
+            failure = me.onLocalDescriptionFailure.bind(me);
 
         me.peerConnection.setLocalDescription(description, success, failure);
     },
 
     /**
+     * Event handler for when creating the call offer failed.
+     * Wraps error description and throws it.
      *
-     * @param   {String} error
+     * @param   {String} error  Description of the error that occured
      * @returns {void}
      * @throws  {Error}
      */
@@ -199,11 +235,14 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when setting the local session description was successfull.
+     * Encodes session description as JSON and sends it over the signaling channel
+     * so that the callee knows we're calling him/her.
      *
-     * @param   {RTCSessionDescription} description
+     * @param   {RTCSessionDescription} description The local session description to be sent over the signaling channel
      * @returns {void}
      */
-    onLocalChannelDescriptionSuccess: function (description) {
+    onLocalDescriptionSuccess: function (description) {
         var me      = this,
             message = JSON.stringify(description);
 
@@ -215,19 +254,28 @@ App.prototype = {
     },
 
     /**
-     * @param   {String} error
+     * Event handler for when setting the local session description failed.
+     * Wraps error description and throws it.
+     *
+     * @param   {String} error  Description of the error that occured
      * @returns {void}
      * @throws  {Error}
      */
-    onLocalChannelDescriptionFailure: function (error) {
+    onLocalDescriptionFailure: function (error) {
         var me = this;
 
         throw new Error(error);
     },
 
     /**
+     * Event hander for when we receive a 'call' event over the signaling channel
+     * from the caller. In practice this is the callers session description
+     * generated by the call offer. From this perspective this represents the
+     * remote session description.
+     * Parses the (JSON) message and create a new RTCSessionDescription.
+     * Set the session description as being the remote description.
      *
-     * @param   {String} message
+     * @param   {String} message    Message send by the caller
      * @returns {void}
      */
     onCall: function (message) {
@@ -241,8 +289,11 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when setting the remote session description was successfull.
+     * Disables 'Call' button.
+     * Disables 'Answer' button if the session description was not a call offer.
      *
-     * @param   {RTCSessionDescription} description
+     * @param   {RTCSessionDescription} description The remote session description to be sent over the signaling channel
      * @returns {void}
      */
     onRemoteDescriptionSuccess: function (description) {
@@ -253,8 +304,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when setting the remote session description failed.
+     * Wraps error description and throws it.
      *
-     * @param   {String} error
+     * @param   {String} error  Description of the error that occured
      * @returns {void}
      * @throws  {Error}
      */
@@ -266,7 +319,10 @@ App.prototype = {
 
 
     /**
-     * Is not triggered by local stream
+     * Event handler for when media stream is added to the peer connection.
+     * Converts the stream to a URL that can be handled by HTML video and
+     * set use it as source for the remote video.
+     * Is not triggered by adding local stream.
      *
      * @param   {Event} evt
      * @returns {void}
@@ -278,8 +334,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when an ICE candidate is added to the peer connection.
+     * Encodes ICE candidate as JSON and sends it over the signaling channel.
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The event that informs us about the ICE candidate
      * @returns {void}
      */
     onIceCandidate: function (evt) {
@@ -290,8 +348,12 @@ App.prototype = {
     },
 
     /**
+     * Event hander for when we receive a 'candidate' event over the signaling channel.
+     * from the caller. In practice this is one of the callers ICE candidates.
+     * Parses the (JSON) message and create a new RTCIceCandidate.
+     * Add ICE candidate to the peer connection.
      *
-     * @param   {Object} message
+     * @param   {Object} message    Message send by the caller/callee
      * @returns {void}
      */
     onCandidate: function (message) {
@@ -308,6 +370,8 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when an ICE candidate was successfully added to the peer connection.
+     * NoOp
      *
      * @returns {void}
      */
@@ -317,8 +381,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when adding an ICE candidate failed.
+     * Wraps error description and throws it.
      *
-     * @param   {String} error
+     * @param   {String} error Description of the error that occured
      * @returns {void}
      * @throws  {Error}
      */
@@ -329,27 +395,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when a data channel was added to the peer connection.
+     * Stores the data channel in reference and attach listeners to it.
      *
-     * @param   {Event} evt
-     * @returns {void}
-     */
-    onIceConnectionStateChange: function (evt) {
-        var me = this,
-            pc = evt.target;
-
-        switch (pc.iceConnectionState) {
-            case 'connected':
-
-                break;
-
-            default:
-                break;
-        }
-    },
-
-    /**
-     *
-     * @param   {RTCDataChannelEvent} evt
+     * @param   {RTCDataChannelEvent} evt   The event that informs us about the data channel
      * @returns {void}
      */
     onDataChannel: function (evt) {
@@ -360,8 +409,10 @@ App.prototype = {
     },
 
     /**
+     * Creates a data channel to use for sending messages over the peer connection.
+     * Stores the data channel in reference and attach listeners to it.
      *
-     * @param   {String} label
+     * @param   {String} label Textual label for the data channel
      * @returns {void}
      */
     createSendingDataChannel: function (label) {
@@ -373,8 +424,9 @@ App.prototype = {
     },
 
     /**
+     * Attach listeners to a data channel for the events: open, message, close, error.
      *
-     * @param   {RTCDataChannel} dataChannel
+     * @param   {RTCDataChannel} dataChannel The data channel to attach the listeners to
      * @returns {void}
      */
     attachDataChannelListeners: function (dataChannel) {
@@ -387,8 +439,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when a data channel opens.
+     * Enables 'Send' button.
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The event that informs us about the data channel that opened
      * @returns {void}
      */
     onDataChannelOpen: function (evt) {
@@ -398,8 +452,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when a data channel receives a message.
+     * Adds the message to the message view with 'remote' as the source.
      *
-     * @param   {MessageEvent} event
+     * @param   {MessageEvent} evt  The event that informs us about the message from the data channel
      * @returns {void}
      */
     onDataChannelMessage: function (evt) {
@@ -411,8 +467,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when a data channel opens.
+     * Disables 'Send' button.
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The event that informs us about the data channel that closed
      * @returns {void}
      */
     onDataChannelClose: function (evt) {
@@ -422,8 +480,10 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when an error occurs on the data channel.
+     * NoOp
      *
-     * @param   {Event} evt
+     * @param   {Event} evt The event that informs us about the data channel error
      * @returns {void}
      */
     onDataChannelError: function (evt) {
