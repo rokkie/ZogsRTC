@@ -211,7 +211,7 @@ App.prototype = {
         var me = this;
 
         me.callBtn.disabled   = true;
-        me.answerBtn.disabled = !(description.type === 'offer');
+        me.answerBtn.disabled = (description.type !== 'offer');
     },
 
     /**
@@ -318,7 +318,7 @@ App.prototype = {
         var me = this;
 
         me.receiveChannel = evt.channel;
-        me.attachDataChannelListeners(me.receiveChannel)
+        me.attachDataChannelListeners(me.receiveChannel);
     },
 
     /**

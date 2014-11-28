@@ -54,6 +54,7 @@ module.exports = function(grunt) {
             all: [
                 './Gruntfile.js',
                 './index.js',
+                './public/js/main.js',
                 './src/ZogsRTC/**/*.js',
                 './src/ZogsRTC.js',
                 './test/ZogsRTC/**/*.js',
