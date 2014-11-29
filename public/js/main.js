@@ -149,9 +149,13 @@ App.prototype = {
     onSendMsgBtnClick: function (evt) {
         var me  = this,
             src = 'local',
-            msg = me.msgInput.value;
+            txt = me.msgInput.value,
+            msg = JSON.stringify({
+                type: 'message',
+                data: txt
+            });
 
-        me.addChatMessage(msg, src);
+        me.addChatMessage(txt, src);
         me.sendingChannel.send(msg);
         me.msgInput.value = null;
     },
@@ -449,6 +453,7 @@ App.prototype = {
         var me = this;
 
         me.sendMsgBtn.disabled = false;
+        me.enableFileDrop();
     },
 
     /**
@@ -461,9 +466,15 @@ App.prototype = {
     onDataChannelMessage: function (evt) {
         var me  = this,
             src = 'remote',
-            msg = evt.data;
+            msg = JSON.parse(evt.data);
 
-        me.addChatMessage(msg, src);
+        switch (msg.type) {
+            case 'message':
+                me.addChatMessage(msg.data, src);
+                break;
+            case 'file':
+                break;
+        }
     },
 
     /**
@@ -477,6 +488,7 @@ App.prototype = {
         var me = this;
 
         me.sendMsgBtn.disabled = true;
+        me.disableFileDrop();
     },
 
     /**
@@ -489,7 +501,114 @@ App.prototype = {
     onDataChannelError: function (evt) {
         var me = this;
 
-    }
+    },
+
+    /**
+     *
+     * @returns {void}
+     */
+    enableFileDrop: function () {
+        var me = this;
+
+        me.messageView.addEventListener('dragover', me.onMessageViewDragOver.bind(me));
+        me.messageView.addEventListener('dragenter', me.onMessageViewDragEnter.bind(me));
+        me.messageView.addEventListener('dragleave', me.onMessageViewDragLeave.bind(me));
+        me.messageView.addEventListener('drop', me.onMessageViewDrop.bind(me));
+        me.messageView.classList.add('dropbox');
+
+    },
+
+    /**
+     *
+     * @returns {void}
+     */
+    disableFileDrop: function () {
+        var me = this;
+
+        me.messageView.removeEventListener('dragover', me.onMessageViewDragOver.bind(me));
+        me.messageView.removeEventListener('dragenter', me.onMessageViewDragEnter.bind(me));
+        me.messageView.removeEventListener('dragleave', me.onMessageViewDragLeave.bind(me));
+        me.messageView.removeEventListener('drop', me.onMessageViewDrop.bind(me));
+        me.messageView.classList.remove('dropbox');
+    },
+
+    /**
+     *
+     * @param   {DragEvent} evt
+     * @returns {void}
+     */
+    onMessageViewDragOver: function (evt) {
+        var me = this;
+
+    },
+
+    /**
+     *
+     * @param   {DragEvent} evt
+     * @returns {void}
+     */
+    onMessageViewDragEnter: function (evt) {
+        var me = this;
+
+
+    },
+
+    /**
+     *
+     * @param   {DragEvent} evt
+     * @returns {void}
+     */
+    onMessageViewDragLeave: function (evt) {
+        var me = this;
+
+
+    },
+
+    /**
+     *
+     * @param   {DragEvent} evt
+     * @returns {void}
+     */
+    onMessageViewDrop: function (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        var me = this;
+
+
+        me.sendFiles(evt.dataTransfer.files);
+    },
+
+    /**
+     *
+     * @param   {FileList} files
+     * @returns {void}
+     */
+    sendFiles: function (files) {
+        var me     = this,
+            reader = new FileReader(),
+            file;
+
+        reader.addEventListener('load', me.onFileReaderLoad.bind(me));
+
+        for (file in files) {
+            if (files.hasOwnProperty(file)) {
+                reader.readAsBinaryString(file);
+            }
+        }
+    },
+
+    /**
+     *
+     * @param   {ProgressEvent} evt
+     * @returns {void}
+     */
+    onFileReaderLoad: function (evt) {
+        var me   = this,
+            blob = evt.target;
+
+        me.sendingChannel.send(blob);
+    },
 };
 
 document.addEventListener('DOMContentLoaded', function () {
