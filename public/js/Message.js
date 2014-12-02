@@ -15,9 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function Message () {
+function Message (uuid) {
     var me         = this,
-        _uuid       = Util.guid(),
+        _uuid       = uuid || Util.guid(),
         _type       = undefined,
         _chunkNr    = 0,
         _chunkCount = 1,
@@ -52,7 +52,7 @@ function Message () {
                 if (!Util.isNumeric(n)) {
                     throw new TypeError("Chunk number must be numeric");
                 }
-                if (0 >= n) {
+                if (0 > n) {
                     throw new RangeError("Chunk number must be greater than 0");
                 }
                 if (_chunkCount < n) {

@@ -151,17 +151,17 @@ App.prototype = {
      * @returns {void}
      */
     onSendMsgBtnClick: function (evt) {
-        var me  = this,
-            src = 'local',
-            txt = me.msgInput.value,
-            msg = JSON.stringify({
-                type: 'message',
-                data: txt
-            });
+        var me    = this,
+            input = me.msgInput,
+            src   = 'local',
+            msg   = new Message();
 
-        me.addChatMessage(txt, src);
-        me.sendingChannel.send(msg);
-        me.msgInput.value = null;
+        msg.type = Message.TYPE_TEXT;
+        msg.data = input.value;
+
+        me.addChatMessage(msg.data, src);
+        me.doSendMessage(msg);
+        input.value = null;
     },
 
     /**
@@ -474,24 +474,45 @@ App.prototype = {
         var me  = this,
             src = 'remote',
             msg = JSON.parse(evt.data),
-            message;
+            message, file;
 
         if (me.incoming.hasOwnProperty(msg.uuid)) {
-            me.incoming[msg.uuid].chunkNr = msg.chunkNr;
-            me.incoming[msg.uuid].data   += msg.data;
+            message = me.incoming[msg.uuid];
+            message.data += msg.data;
         } else {
-            me.incoming[msg.uuid] = msg;
+            message = new Message(msg.uuid);
+            message.type = msg.type;
+            message.data = msg.data;
+
+            me.incoming[msg.uuid] = message;
         }
 
-        message = me.incoming[msg.uuid];
-        if (message.chunkNr === message.chunkCount) {
+        message.chunkCount = msg.chunkCount;
+        message.chunkNr    = msg.chunkNr;
+
+        if (message.chunkNr === (message.chunkCount - 1)) {
 
             switch (message.type) {
-                case 'message':
+                case Message.TYPE_TEXT:
                     me.addChatMessage(message.data, src);
                     break;
-                case 'file':
-                    console.log(message.data)
+                case Message.TYPE_FILE:
+
+                    file = new Blob([message.data], {
+                        type: 'text/plain'
+                    });
+
+                    var fileName = 'henk.txt';
+                    var a = document.createElement('a');
+                    var linkTxt = document.createTextNode('Save file');
+
+                    a.appendChild(linkTxt);
+                    a.download = fileName;
+                    a.href = URL.createObjectURL(file);
+
+                    a.click();
+
+
                     break;
             }
         }
@@ -634,7 +655,6 @@ App.prototype = {
         msg.data = evt.target.result;
 
         me.doSendMessage(msg);
-//        me.sendingChannel.send(msg);
     },
 
     /**
@@ -653,7 +673,7 @@ App.prototype = {
         chunk.chunkCount = chunkCount;
         chunk.type       = message.type;
 
-        for (i = 1; i <= chunkCount; i++) {
+        for (i = 0; i < chunkCount; i++) {
             chunk.chunkNr = i;
             chunk.data    = message.data.substr(i * chunkSize, chunkSize);
 
