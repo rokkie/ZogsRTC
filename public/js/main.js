@@ -39,6 +39,10 @@ var App = function () {
         }]
     });
 
+    // chuck size for sending data
+    me.chunkSize = 65536;   // 64k
+    me.incoming  = {};
+
     // set initial button states
     me.callBtn.disabled    = false;
     me.answerBtn.disabled  = true;
@@ -445,6 +449,7 @@ App.prototype = {
     /**
      * Event handler for when a data channel opens.
      * Enables 'Send' button.
+     * Enables FileDrop.
      *
      * @param   {Event} evt The event that informs us about the data channel that opened
      * @returns {void}
@@ -452,8 +457,10 @@ App.prototype = {
     onDataChannelOpen: function (evt) {
         var me = this;
 
-        me.sendMsgBtn.disabled = false;
-        me.enableFileDrop();
+        if (me.sendingChannel === evt.target) {
+            me.sendMsgBtn.disabled = false;
+            me.enableFileDrop();
+        }
     },
 
     /**
@@ -466,15 +473,29 @@ App.prototype = {
     onDataChannelMessage: function (evt) {
         var me  = this,
             src = 'remote',
-            msg = JSON.parse(evt.data);
+            msg = JSON.parse(evt.data),
+            message;
 
-        switch (msg.type) {
-            case 'message':
-                me.addChatMessage(msg.data, src);
-                break;
-            case 'file':
-                break;
+        if (me.incoming.hasOwnProperty(msg.uuid)) {
+            me.incoming[msg.uuid].chunkNr = msg.chunkNr;
+            me.incoming[msg.uuid].data   += msg.data;
+        } else {
+            me.incoming[msg.uuid] = msg;
         }
+
+        message = me.incoming[msg.uuid];
+        if (message.chunkNr === message.chunkCount) {
+
+            switch (message.type) {
+                case 'message':
+                    me.addChatMessage(message.data, src);
+                    break;
+                case 'file':
+                    console.log(message.data)
+                    break;
+            }
+        }
+
     },
 
     /**
@@ -514,8 +535,7 @@ App.prototype = {
         me.messageView.addEventListener('dragenter', me.onMessageViewDragEnter.bind(me));
         me.messageView.addEventListener('dragleave', me.onMessageViewDragLeave.bind(me));
         me.messageView.addEventListener('drop', me.onMessageViewDrop.bind(me));
-        me.messageView.classList.add('dropbox');
-
+        me.messageView.classList.remove('disabled');
     },
 
     /**
@@ -529,7 +549,7 @@ App.prototype = {
         me.messageView.removeEventListener('dragenter', me.onMessageViewDragEnter.bind(me));
         me.messageView.removeEventListener('dragleave', me.onMessageViewDragLeave.bind(me));
         me.messageView.removeEventListener('drop', me.onMessageViewDrop.bind(me));
-        me.messageView.classList.remove('dropbox');
+        me.messageView.classList.add('disabled');
     },
 
     /**
@@ -540,6 +560,7 @@ App.prototype = {
     onMessageViewDragOver: function (evt) {
         var me = this;
 
+        evt.preventDefault();
     },
 
     /**
@@ -550,7 +571,7 @@ App.prototype = {
     onMessageViewDragEnter: function (evt) {
         var me = this;
 
-
+        me.messageView.classList.add('over');
     },
 
     /**
@@ -561,7 +582,7 @@ App.prototype = {
     onMessageViewDragLeave: function (evt) {
         var me = this;
 
-
+        me.messageView.classList.remove('over');
     },
 
     /**
@@ -570,12 +591,11 @@ App.prototype = {
      * @returns {void}
      */
     onMessageViewDrop: function (evt) {
-        evt.stopPropagation();
-        evt.preventDefault();
-
         var me = this;
 
+        evt.preventDefault();
 
+        me.messageView.classList.remove('over');
         me.sendFiles(evt.dataTransfer.files);
     },
 
@@ -587,14 +607,13 @@ App.prototype = {
     sendFiles: function (files) {
         var me     = this,
             reader = new FileReader(),
-            file;
+            file, i;
 
         reader.addEventListener('load', me.onFileReaderLoad.bind(me));
 
-        for (file in files) {
-            if (files.hasOwnProperty(file)) {
-                reader.readAsBinaryString(file);
-            }
+        for (i = 0; i < files.length; i++) {
+            file = files.item(i);
+            reader.readAsBinaryString(file);
         }
     },
 
@@ -604,11 +623,44 @@ App.prototype = {
      * @returns {void}
      */
     onFileReaderLoad: function (evt) {
-        var me   = this,
-            blob = evt.target;
+        var me  = this,
+            msg = {
+                type: 'file',
+                data: evt.target.result
+            };
 
-        me.sendingChannel.send(blob);
+        msg = new Message();
+        msg.type = 'file';
+        msg.data = evt.target.result;
+
+        me.doSendMessage(msg);
+//        me.sendingChannel.send(msg);
     },
+
+    /**
+     *
+     * @param   {Message} message
+     * @returns {void}
+     */
+    doSendMessage: function (message) {
+        var me         = this,
+            padding    = message.overhead() + 10, // 10 digits for chunkCount should be sufficient in most cases
+            chunkSize  = (me.chunkSize - padding),
+            chunkCount = Math.ceil(message.size() / chunkSize),
+            chunk      = new Message(),
+            i;
+
+        chunk.chunkCount = chunkCount;
+        chunk.type       = message.type;
+
+        for (i = 1; i <= chunkCount; i++) {
+            chunk.chunkNr = i;
+            chunk.data    = message.data.substr(i * chunkSize, chunkSize);
+
+            me.sendingChannel.send(chunk.toString());
+        }
+    }
+
 };
 
 document.addEventListener('DOMContentLoaded', function () {
