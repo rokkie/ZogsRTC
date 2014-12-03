@@ -81,8 +81,8 @@ function Message (uuid) {
             get: function () {
                 return _meta;
             },
-            set: function (info) {
-
+            set: function (meta) {
+                _meta = meta;       // What i really want is key/value pairs
             }
         },
         data: {
