@@ -466,7 +466,13 @@ App.prototype = {
 
     /**
      * Event handler for when a data channel receives a message.
-     * Adds the message to the message view with 'remote' as the source.
+     * Decodes the message and checks the uuid if it already has part of it in memory.
+     * If this is the case, it adds the data to the existing message, otherwise
+     * it stores a new message.
+     * Checks if the received chuck was also the last one.
+     * It this is the case, it check what kind of message it was.
+     * A text message is added to the message view with 'remote' as source.
+     * A file message is added to the download list.
      *
      * @param   {MessageEvent} evt  The event that informs us about the message from the data channel
      * @returns {void}
@@ -509,7 +515,6 @@ App.prototype = {
                     break;
             }
         }
-
     },
 
     /**
@@ -539,6 +544,10 @@ App.prototype = {
     },
 
     /**
+     * Registers listeners for the dragover, dragenter, dragleave and drop events on the
+     * message view, enabling the ability to drag/drop files in the message view
+     * to send them to the other party.
+     * Removes the 'disabled' class from the message view to indicate is has become active.
      *
      * @returns {void}
      */
@@ -553,6 +562,9 @@ App.prototype = {
     },
 
     /**
+     * Unregisters listeners for the dragover, dragenter, dragleave and drop events on the
+     * message view, disabling the ability to drag/drop files in the message view.
+     * Adds the 'disabled' class to the message view to indicate is has become inactive.
      *
      * @returns {void}
      */
@@ -567,8 +579,10 @@ App.prototype = {
     },
 
     /**
+     * Event lister for when a file is dragged over the message view.
+     * NoOp
      *
-     * @param   {DragEvent} evt
+     * @param   {DragEvent} evt The drag event
      * @returns {void}
      */
     onMessageViewDragOver: function (evt) {
@@ -578,8 +592,10 @@ App.prototype = {
     },
 
     /**
+     * Event lister for when a dragged file enters the message view.
+     * Adds the 'over' class to the message view which changes the border color.
      *
-     * @param   {DragEvent} evt
+     * @param   {DragEvent} evt The drag event
      * @returns {void}
      */
     onMessageViewDragEnter: function (evt) {
@@ -589,8 +605,10 @@ App.prototype = {
     },
 
     /**
+     * Event lister for when a dragged file leaves the message view.
+     * Removes the 'over' class from the message view which restores the border color.
      *
-     * @param   {DragEvent} evt
+     * @param   {DragEvent} evt The drag event
      * @returns {void}
      */
     onMessageViewDragLeave: function (evt) {
@@ -600,8 +618,11 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when a file was dropped on the message view.
+     * Removes the 'over' class from the message view, restoring the border color.
+     * Starts the proccess of reading the files that were dropped on the message view.
      *
-     * @param   {DragEvent} evt
+     * @param   {DragEvent} evt The drag event
      * @returns {void}
      */
     onMessageViewDrop: function (evt) {
@@ -694,8 +715,9 @@ App.prototype = {
     },
 
     /**
+     * Add a download link of an incoming file to the page.
      *
-     * @param   {Message} message
+     * @param   {Message} message   The incoming message containing the file
      * @returns {void}
      */
     addFileDownload: function (message) {
@@ -714,9 +736,13 @@ App.prototype = {
     },
 
     /**
+     * Event handler for when a download link is clicked.
+     * Deletes the reference to the incoming file.
+     * Removes the event listener.
+     * Removes the link itself.
      *
-     * @param   {String} uuid
-     * @param   {Event}  evt
+     * @param   {String} uuid   The unique identifier fo the file
+     * @param   {Event}  evt    The click event
      * @returns {void}
      */
     onFileDownloadClick: function (uuid, evt) {
