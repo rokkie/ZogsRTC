@@ -82,7 +82,7 @@ function Message (uuid) {
                 return _meta;
             },
             set: function (meta) {
-                _meta = meta;       // What i really want is key/value pairs
+                throw new Error('Meta should not be set directly. Use setMeta instead');
             }
         },
         data: {
@@ -97,6 +97,12 @@ function Message (uuid) {
 };
 
 Message.prototype = {
+
+    setMeta: function(key, value) {
+        var me = this;
+
+        me.meta[key] = value;
+    },
 
     size: function () {
         var me   = this,

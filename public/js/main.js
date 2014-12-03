@@ -472,10 +472,11 @@ App.prototype = {
      * @returns {void}
      */
     onDataChannelMessage: function (evt) {
-        var me  = this,
-            src = 'remote',
-            msg = JSON.parse(evt.data),
-            message, file, meta;
+        var me   = this,
+            src  = 'remote',
+            msg  = JSON.parse(evt.data),
+            meta = msg.meta,
+            message, key;
 
         if (me.incoming.hasOwnProperty(msg.uuid)) {
             message = me.incoming[msg.uuid];
@@ -484,7 +485,12 @@ App.prototype = {
             message = new Message(msg.uuid);
             message.type = msg.type;
             message.data = msg.data;
-            message.meta = msg.meta;
+
+            for (key in meta) {
+                if (meta.hasOwnProperty(key)) {
+                    message.setMeta(key, meta[key]);
+                }
+            }
 
             me.incoming[msg.uuid] = message;
         }
@@ -645,10 +651,8 @@ App.prototype = {
         msg = new Message();
         msg.type = 'file';
         msg.data = reader.result;
-        msg.meta = {
-            fileName: file.name,
-            mimeType: file.type
-        };
+        msg.setMeta('fileName', file.name);
+        msg.setMeta('mimeType', file.type);
 
         me.doSendMessage(msg);
 
@@ -663,6 +667,7 @@ App.prototype = {
     doSendMessage: function (message) {
         var me         = this,
             padding    = message.overhead() + 10, // 10 digits for chunkCount should be sufficient in most cases
+            meta       = message.meta,
             chunkSize  = (me.chunkSize - padding),
             chunkCount = Math.ceil(message.size() / chunkSize),
             chunk      = new Message(),
@@ -670,7 +675,12 @@ App.prototype = {
 
         chunk.chunkCount = chunkCount;
         chunk.type       = message.type;
-        chunk.meta       = message.meta;
+
+        for (key in meta) {
+            if (meta.hasOwnProperty(key)) {
+                chunk.setMeta(key, meta[key]);
+            }
+        }
 
         for (i = 0; i < chunkCount; i++) {
             start = i * chunkSize;
