@@ -616,7 +616,7 @@ App.prototype = {
         evt.preventDefault();
 
         me.messageView.classList.remove('over');
-        me.sendFiles(evt.dataTransfer.files);
+        me.readFiles(evt.dataTransfer.files);
     },
 
     /**
@@ -624,7 +624,7 @@ App.prototype = {
      * @param   {FileList} files
      * @returns {void}
      */
-    sendFiles: function (files) {
+    readFiles: function (files) {
         var me     = this,
             reader, file, i;
 
