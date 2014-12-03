@@ -30,6 +30,9 @@ var Util = (function () {
             .substring(1);
     };
 
+    var encoder = new TextEncoder('utf-8');
+    var decoder = new TextDecoder('utf-8');
+
     return {
 
         /**
@@ -59,27 +62,19 @@ var Util = (function () {
          * @returns {String}
          */
         ab2str: function (ab) {
-            return String.fromCharCode.apply(null, new Uint16Array(ab));
+            var view = new DataView(ab);
+            return decoder.decode(view);
         },
 
         /**
          * Convert String to ArrayBuffer
          *
-         * @param   {Strin str
+         * @param   {String} str
          * @returns {ArrayBuffer}
          */
         str2ab: function (str) {
-            var length = str.length,
-                size   = length * 2,    // allows for multibyte string
-                buffer = new ArrayBuffer(size),
-                view   = new Uint16Array(buffer),
-                i;
-
-            for (i = 0; i < length; i++) {
-                view[i] = str.charCodeAt(i);
-            }
-
-            return buffer;
+            var view = encoder.encode(str);
+            return view.buffer.slice(0);
         }
     };
 
