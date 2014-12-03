@@ -23,6 +23,7 @@ var App = function () {
     me.localView   = doc.getElementById('local-view');
     me.remoteView  = doc.getElementById('remote-view');
     me.messageView = doc.getElementById('message-view');
+    me.filesCt     = doc.getElementById('files-ct');
     me.callBtn     = doc.getElementById('call-btn');
     me.answerBtn   = doc.getElementById('answer-btn');
     me.hangupBtn   = doc.getElementById('hangup-btn');
@@ -498,20 +499,7 @@ App.prototype = {
                     me.addChatMessage(message.data, src);
                     break;
                 case Message.TYPE_FILE:
-                    meta = message.meta;
-                    file = new Blob([message.data], {
-                        type: meta.mimeType
-                    });
-
-                    var a = document.createElement('a');
-                    var linkTxt = document.createTextNode('Save file');
-
-                    a.appendChild(linkTxt);
-                    a.download = meta.fileName;
-                    a.href = URL.createObjectURL(file);
-
-                    a.click();
-
+                    me.addFileDownload(message);
                     break;
             }
         }
@@ -636,7 +624,7 @@ App.prototype = {
                 return me.onFileReaderLoad.bind(me, file);
             }(file)));
 
-            reader.readAsBinaryString(file);
+            reader.readAsDataURL(file);
         }
     },
 
@@ -678,20 +666,58 @@ App.prototype = {
             chunkSize  = (me.chunkSize - padding),
             chunkCount = Math.ceil(message.size() / chunkSize),
             chunk      = new Message(),
-            i;
+            key, i, start, end;
 
         chunk.chunkCount = chunkCount;
         chunk.type       = message.type;
         chunk.meta       = message.meta;
 
         for (i = 0; i < chunkCount; i++) {
+            start = i * chunkSize;
+            end   = start + chunkSize;
+
             chunk.chunkNr = i;
-            chunk.data    = message.data.substr(i * chunkSize, chunkSize);
+            chunk.data    = message.data.slice(start, end);
 
             me.sendingChannel.send(chunk.toString());
         }
-    }
+    },
 
+    /**
+     *
+     * @param   {Message} message
+     * @returns {void}
+     */
+    addFileDownload: function (message) {
+        var me  = this,
+            doc = document,
+            a   = doc.createElement('a'),
+            txt = doc.createTextNode(message.meta.fileName);
+
+        a.appendChild(txt);
+        a.download = message.meta.fileName;
+        a.href     = message.data;
+
+        a.addEventListener('click', me.onFileDownloadClick.bind(me, message.uuid));
+
+        me.filesCt.appendChild(a);
+    },
+
+    /**
+     *
+     * @param   {String} uuid
+     * @param   {Event}  evt
+     * @returns {void}
+     */
+    onFileDownloadClick: function (uuid, evt) {
+        var me = this,
+            a  = evt.target;
+
+        delete me.incoming[uuid];
+
+        a.removeEventListener('click', me.onFileDownloadClick.bind(me, uuid));
+        me.filesCt.removeChild(a);
+    }
 };
 
 document.addEventListener('DOMContentLoaded', function () {

@@ -56,3 +56,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000360}}
 #msg-input {
   width: 600px; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000364}}
+#files-ct {
+  width: 650px;
+  padding: 10px 0; }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/rocco\/Development\/workspaces\/personal\/ZogsRTC\/public\/scss\/style\.scss}line{font-family:\0000368}}
+  #files-ct a {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAGdSURBVDjLlZNLSwJhFIa1Rb8iIWhRQUlluuoftDEtC5TKSgINily1CmoT0kJBqwlSaBGBLVxItGgZQQQVFe3bKN7wOjqO2tucwRGvqAMPMzDf+8w5ZzgyADLhGhJQCWi6MCwwQBkJWVWg4jguVSqVKuVyGe0Q3sPtdruaJZJAQ+FcLgeWZWuk02kkk0lEIhFREg6H4fF4GiR0yUlABwqFAorFongnstksUqkUotGoKMjn86CPMAwjSloEFJYgAQUymQxisVhLS9WZyBsEQhu1A/RMfUutxONxsZJQKNRZ0Ey9hCqheSQSid4F9RJqh2ZCor4EBM/z4lxIQvQtoCp2HtexfW+CObAM062uu4BCElSBJWjEzc8Vrr8Y6L3zvQsoTKz6F+H7PAPz7oLRp8eodmSjp7/geDqG2b8Me9CK8zcnXK8O7AWsmDtUF9UHUw/1gr+2O8BzsPm3YLvbhPPlBI7nI6xc6jC9P/Gr3B0flHZhVpgyKwQ6LpPFtwaTdwmGCy0MpwsVWsD6ZVKQpNs6z9iV35PWsY/q6iso+w9crJoc0rRwaAAAAABJRU5ErkJggg==);
+    background-position: center left;
+    background-repeat: no-repeat;
+    display: block;
+    padding: 3px 3px 3px 20px; }
