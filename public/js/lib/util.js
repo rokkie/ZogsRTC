@@ -44,12 +44,42 @@ var Util = (function () {
 
         /**
          * Check if value is numeric
-         * 
+         *
          * @param   {mixed} n
          * @returns {Boolean}
          */
         isNumeric: function (n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
+        },
+
+        /**
+         * Convert ArrayBuffer to String
+         *
+         * @param   {ArrayBuffer} ab
+         * @returns {String}
+         */
+        ab2str: function (ab) {
+            return String.fromCharCode.apply(null, new Uint16Array(ab));
+        },
+
+        /**
+         * Convert String to ArrayBuffer
+         *
+         * @param   {Strin str
+         * @returns {ArrayBuffer}
+         */
+        str2ab: function (str) {
+            var length = str.length,
+                size   = length * 2,    // allows for multibyte string
+                buffer = new ArrayBuffer(size),
+                view   = new Uint16Array(buffer),
+                i;
+
+            for (i = 0; i < length; i++) {
+                view[i] = str.charCodeAt(i);
+            }
+
+            return buffer;
         }
     };
 
