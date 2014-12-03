@@ -474,7 +474,7 @@ App.prototype = {
         var me  = this,
             src = 'remote',
             msg = JSON.parse(evt.data),
-            message, file;
+            message, file, meta;
 
         if (me.incoming.hasOwnProperty(msg.uuid)) {
             message = me.incoming[msg.uuid];
@@ -483,6 +483,7 @@ App.prototype = {
             message = new Message(msg.uuid);
             message.type = msg.type;
             message.data = msg.data;
+            message.meta = msg.meta;
 
             me.incoming[msg.uuid] = message;
         }
@@ -497,21 +498,19 @@ App.prototype = {
                     me.addChatMessage(message.data, src);
                     break;
                 case Message.TYPE_FILE:
-
+                    meta = message.meta;
                     file = new Blob([message.data], {
-                        type: 'text/plain'
+                        type: meta.mimeType
                     });
 
-                    var fileName = 'henk.txt';
                     var a = document.createElement('a');
                     var linkTxt = document.createTextNode('Save file');
 
                     a.appendChild(linkTxt);
-                    a.download = fileName;
+                    a.download = meta.fileName;
                     a.href = URL.createObjectURL(file);
 
                     a.click();
-
 
                     break;
             }
@@ -627,34 +626,45 @@ App.prototype = {
      */
     sendFiles: function (files) {
         var me     = this,
-            reader = new FileReader(),
-            file, i;
-
-        reader.addEventListener('load', me.onFileReaderLoad.bind(me));
+            reader, file, i;
 
         for (i = 0; i < files.length; i++) {
             file = files.item(i);
+
+            reader = new FileReader();
+            reader.addEventListener('load', (function (file) {
+                return me.onFileReaderLoad.bind(me, file);
+            }(file)));
+
             reader.readAsBinaryString(file);
         }
     },
 
     /**
      *
+     * @param   {File}          file
      * @param   {ProgressEvent} evt
      * @returns {void}
      */
-    onFileReaderLoad: function (evt) {
-        var me  = this,
-            msg = {
+    onFileReaderLoad: function (file, evt) {
+        var me     = this,
+            reader = evt.target,
+            msg    = {
                 type: 'file',
-                data: evt.target.result
+                data: reader.result
             };
 
         msg = new Message();
         msg.type = 'file';
-        msg.data = evt.target.result;
+        msg.data = reader.result;
+        msg.meta = {
+            fileName: file.name,
+            mimeType: file.type
+        };
 
         me.doSendMessage(msg);
+
+        reader.removeEventListener('load', me.onFileReaderLoad.bind(me, file));
     },
 
     /**
@@ -672,6 +682,7 @@ App.prototype = {
 
         chunk.chunkCount = chunkCount;
         chunk.type       = message.type;
+        chunk.meta       = message.meta;
 
         for (i = 0; i < chunkCount; i++) {
             chunk.chunkNr = i;
