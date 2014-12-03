@@ -635,62 +635,77 @@ App.prototype = {
     },
 
     /**
+     * Creates a file reader for each file and registers a listener for the 'load'
+     * event to it which is triggered when the entire contents of the file was read.
+     * Also makes sure the file object is passed to the listener so we still know
+     * what the filename etc was.
+     * Then read the contents of the file as a data-url.
      *
-     * @param   {FileList} files
+     * @param   {FileList} files    The files that were dropped on the message view
      * @returns {void}
      */
     readFiles: function (files) {
-        var me     = this,
+        var me = this,
             reader, file, i;
 
         for (i = 0; i < files.length; i++) {
-            file = files.item(i);
-
+            file   = files.item(i);
             reader = new FileReader();
-            reader.addEventListener('load', (function (file) {
-                return me.onFileReaderLoad.bind(me, file);
-            }(file)));
 
+            reader.addEventListener('load', me.onFileReaderLoad.bind(me, file));
             reader.readAsDataURL(file);
         }
     },
 
     /**
+     * Event handler for when the entire contents of a file was read.
+     * Creates a new message and populates it with the file data.
+     * Remove the event listener for the load event as it is no longer needed.
+     * Start the process of sending the file.
      *
-     * @param   {File}          file
-     * @param   {ProgressEvent} evt
+     * @param   {File}          file    The original file object
+     * @param   {ProgressEvent} evt     The load event
      * @returns {void}
      */
     onFileReaderLoad: function (file, evt) {
         var me     = this,
             reader = evt.target,
-            msg    = {
-                type: 'file',
-                data: reader.result
-            };
+            msg    = new Message();
 
-        msg = new Message();
         msg.type = 'file';
         msg.data = reader.result;
         msg.setMeta('fileName', file.name);
         msg.setMeta('mimeType', file.type);
 
-        me.doSendMessage(msg);
-
         reader.removeEventListener('load', me.onFileReaderLoad.bind(me, file));
+
+        me.doSendMessage(msg);
     },
 
     /**
+     * Since we cannot send the entire file in one go we need to split it into
+     * individual chunks and send these separately.
+     * The message were sending over the line is a JSON encoded string so we
+     * can't chop it at an arbitrary length. Also the other side needs to know
+     * how many chunk it's going to receive per message as well as which chunk
+     * it's currently dealing with.
+     * In order to do this we look at how much data the message contains that
+     * is _not_ part of the content, in other words, overhead. We subtract that
+     * from the chunk size to calculate how much of the content we can
+     * stuff into one chunk without exceeding the chunk size.
+     * We can then use that to determine how many chunk we'll be needing.
+     * Now we loop as many times as we need chunks and send a message containing
+     * a part of the content.
      *
-     * @param   {Message} message
+     * @param   {Message} message   The message to send
      * @returns {void}
      */
     doSendMessage: function (message) {
         var me         = this,
             padding    = message.overhead() + 10, // 10 digits for chunkCount should be sufficient in most cases
             meta       = message.meta,
-            chunkSize  = (me.chunkSize - padding),
-            chunkCount = Math.ceil(message.size() / chunkSize),
+            dataSize   = (me.chunkSize - padding),
+            chunkCount = Math.ceil(message.size() / dataSize),
             chunk      = new Message(),
             key, i, start, end;
 
@@ -704,8 +719,8 @@ App.prototype = {
         }
 
         for (i = 0; i < chunkCount; i++) {
-            start = i * chunkSize;
-            end   = start + chunkSize;
+            start = i * dataSize;
+            end   = start + dataSize;
 
             chunk.chunkNr = i;
             chunk.data    = message.data.slice(start, end);
