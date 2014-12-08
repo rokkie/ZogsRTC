@@ -40,9 +40,8 @@ var App = function () {
         }]
     });
 
-    // chuck size for sending data
-    me.chunkSize = 65536;   // 64k
-    me.incoming  = {};
+    // map for incoming message chunks
+    me.incoming = new Map();
 
     // set initial button states
     me.callBtn.disabled    = false;
@@ -152,16 +151,18 @@ App.prototype = {
      * @returns {void}
      */
     onSendMsgBtnClick: function (evt) {
-        var me    = this,
-            input = me.msgInput,
-            src   = 'local',
-            msg   = new Message();
+        var me      = this,
+            input   = me.msgInput,
+            msg     = input.value,
+            message = new Message();
 
-        msg.type = Message.TYPE_TEXT;
-        msg.data = input.value;
+        message.type = Message.TYPE_TEXT;
+        message.mime = 'text/plain';
+        message.data = msg;
 
-        me.addChatMessage(msg.data, src);
-        me.doSendMessage(msg);
+        me.addChatMessage(message, 'local');
+        me.doSendMessage(message);
+
         input.value = null;
     },
 
@@ -169,14 +170,15 @@ App.prototype = {
      * Add a chat message to the view.
      * Creates a bit of markup and appends it to the message view.
      *
-     * @param   {String} message    The message to add
-     * @param   {String} source     Where the message originated from local|remote
+     * @param   {Message} message    The message to add
+     * @param   {String}  source     Where the message originated from local|remote
      * @returns {void}
      */
     addChatMessage: function (message, source) {
         var me  = this,
             doc = document,
-            txt = doc.createTextNode(message),
+            msg = Util.ab2str(message.data),
+            txt = doc.createTextNode(msg),
             el  = doc.createElement('span');
 
         el.classList.add('chat-msg', source);
@@ -478,42 +480,30 @@ App.prototype = {
      * @returns {void}
      */
     onDataChannelMessage: function (evt) {
-        var me   = this,
-            src  = 'remote',
-            msg  = JSON.parse(evt.data),
-            meta = msg.meta,
-            message, key;
+        var me  = this,
+            msg = Message.parse(evt.data),
+            message;
 
-        if (me.incoming.hasOwnProperty(msg.uuid)) {
-            message = me.incoming[msg.uuid];
-            message.data += msg.data;
+        if (me.incoming.has(msg.uuid)) {
+            message = me.incoming.get(msg.uuid);
         } else {
-            message = new Message(msg.uuid);
-            message.type = msg.type;
-            message.data = msg.data;
-
-            for (key in meta) {
-                if (meta.hasOwnProperty(key)) {
-                    message.setMeta(key, meta[key]);
-                }
-            }
-
-            me.incoming[msg.uuid] = message;
+            message = msg;
+            me.incoming.set(message.uuid, message);
         }
 
-        message.chunkCount = msg.chunkCount;
-        message.chunkNr    = msg.chunkNr;
+        message.addChunk(msg.chunkNr, msg.data);
 
-        if (message.chunkNr === (message.chunkCount - 1)) {
-
+        if (message.complete) {
             switch (message.type) {
                 case Message.TYPE_TEXT:
-                    me.addChatMessage(message.data, src);
+                    me.addChatMessage(message, 'remote');
                     break;
                 case Message.TYPE_FILE:
                     me.addFileDownload(message);
                     break;
             }
+
+            me.incoming.delete(message.uuid);
         }
     },
 
@@ -653,7 +643,7 @@ App.prototype = {
             reader = new FileReader();
 
             reader.addEventListener('load', me.onFileReaderLoad.bind(me, file));
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         }
     },
 
@@ -673,9 +663,9 @@ App.prototype = {
             msg    = new Message();
 
         msg.type = 'file';
+        msg.name = file.name;
+        msg.mime = file.type;
         msg.data = reader.result;
-        msg.setMeta('fileName', file.name);
-        msg.setMeta('mimeType', file.type);
 
         reader.removeEventListener('load', me.onFileReaderLoad.bind(me, file));
 
@@ -701,31 +691,11 @@ App.prototype = {
      * @returns {void}
      */
     doSendMessage: function (message) {
-        var me         = this,
-            padding    = message.overhead() + 10, // 10 digits for chunkCount should be sufficient in most cases
-            meta       = message.meta,
-            dataSize   = (me.chunkSize - padding),
-            chunkCount = Math.ceil(message.size() / dataSize),
-            chunk      = new Message(),
-            key, i, start, end;
+        var me = this,
+            chunk;
 
-        chunk.chunkCount = chunkCount;
-        chunk.type       = message.type;
-
-        for (key in meta) {
-            if (meta.hasOwnProperty(key)) {
-                chunk.setMeta(key, meta[key]);
-            }
-        }
-
-        for (i = 0; i < chunkCount; i++) {
-            start = i * dataSize;
-            end   = start + dataSize;
-
-            chunk.chunkNr = i;
-            chunk.data    = message.data.slice(start, end);
-
-            me.sendingChannel.send(chunk.toString());
+        for (chunk of message) {
+            me.sendingChannel.send(chunk);
         }
     },
 
@@ -736,14 +706,18 @@ App.prototype = {
      * @returns {void}
      */
     addFileDownload: function (message) {
-        var me  = this,
-            doc = document,
-            a   = doc.createElement('a'),
-            txt = doc.createTextNode(message.meta.fileName);
+        var me   = this,
+            doc  = document,
+            a    = doc.createElement('a'),
+            txt  = doc.createTextNode(message.name),
+            blob = new Blob([message.data], {
+                type: message.mime
+            });
 
         a.appendChild(txt);
-        a.download = message.meta.fileName;
-        a.href     = message.data;
+        a.download = message.name;
+        a.title    = 'Download ' + message.name;
+        a.href     = URL.createObjectURL(blob);
 
         a.addEventListener('click', me.onFileDownloadClick.bind(me, message.uuid));
 
@@ -764,7 +738,7 @@ App.prototype = {
         var me = this,
             a  = evt.target;
 
-        delete me.incoming[uuid];
+        me.incoming.delete(uuid);
 
         a.removeEventListener('click', me.onFileDownloadClick.bind(me, uuid));
         me.filesCt.removeChild(a);
