@@ -629,7 +629,7 @@ App.prototype = {
      * event to it which is triggered when the entire contents of the file was read.
      * Also makes sure the file object is passed to the listener so we still know
      * what the filename etc was.
-     * Then read the contents of the file as a data-url.
+     * Then read the contents of the file as an array buffer.
      *
      * @param   {FileList} files    The files that were dropped on the message view
      * @returns {void}
@@ -675,17 +675,6 @@ App.prototype = {
     /**
      * Since we cannot send the entire file in one go we need to split it into
      * individual chunks and send these separately.
-     * The message were sending over the line is a JSON encoded string so we
-     * can't chop it at an arbitrary length. Also the other side needs to know
-     * how many chunk it's going to receive per message as well as which chunk
-     * it's currently dealing with.
-     * In order to do this we look at how much data the message contains that
-     * is _not_ part of the content, in other words, overhead. We subtract that
-     * from the chunk size to calculate how much of the content we can
-     * stuff into one chunk without exceeding the chunk size.
-     * We can then use that to determine how many chunk we'll be needing.
-     * Now we loop as many times as we need chunks and send a message containing
-     * a part of the content.
      *
      * @param   {Message} message   The message to send
      * @returns {void}

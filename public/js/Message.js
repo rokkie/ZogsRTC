@@ -246,6 +246,22 @@ Message.prototype = {
     }
 };
 
+/**
+ * The message were sending over the line is an array buffer that includes
+ * some metadata such as uuid and mime type etc. This means we can't chop the
+ * message at an arbitrary length. Also the other side needs to know
+ * how many chunk it's going to receive per message as well as which chunk
+ * it's currently dealing with.
+ * In order to do this we look at how much data the message contains that
+ * is _not_ part of the content, in other words, overhead. We subtract that
+ * from the chunk size to calculate how much of the content we can
+ * stuff into one chunk without exceeding the chunk size.
+ * We can then use that to determine how many chunk we'll be needing.
+ * Now we loop as many times as we need chunks and return an array buffer
+ * containing a part of the content.
+ *
+ * @returns {ArrayBuffer}
+ */
 Message.prototype[Symbol.iterator] = function* () {
     var me         = this,
         size       = me.size(),
@@ -278,7 +294,11 @@ Message.prototype[Symbol.iterator] = function* () {
 };
 
 /**
- * Parse buffer into message
+ * Parse buffer into message.
+ * The format looks als follows:
+ *
+ * [ uuid | type | chunknr | countcnt | filename | data  ]
+ * [  36  |  4   |    8    |     8    |    255   | 65221 ]
  *
  * @static
  * @param   {ArrayBuffer} buffer
